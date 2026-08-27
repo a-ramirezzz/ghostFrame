@@ -1,32 +1,98 @@
-# React + TypeScript + Vite
+<div align="center">
+  <img src="public/ghostframe-icon.png" alt="GhostFrame" width="80" />
+  <h1>GhostFrame</h1>
+  <p><strong>Create metadata-free images for social media.</strong></p>
+  <p>A client-side image editor built for content creators who need clean, undetectable images — no EXIF, no fingerprints, no traces.</p>
+</div>
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+---
 
-Currently, two official plugins are available:
+## Why GhostFrame?
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+Social media platforms scan uploaded images for metadata (EXIF, XMP, C2PA) and use perceptual hashing to detect duplicates or AI-generated content. GhostFrame solves this by letting you compose images — quote overlays, filters, watermarks — and export them completely clean. Every export is a new image with zero metadata, processed entirely in your browser.
 
-## React Compiler
+No server. No uploads. No data leaves your machine.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Features
 
-## Expanding the Oxlint configuration
+- **Drag & drop image loading** — supports JPG, PNG, and WebP
+- **Quote text editor** — 5 curated fonts (Playfair Display, Montserrat, Lora, Cinzel, Raleway), adjustable size, color, position, and alignment
+- **Author attribution** — optional citation line rendered below the quote
+- **5 visual filters** — Stoic Dark, Marble, Golden Hour, Noir, Mist — each with adjustable intensity
+- **Adaptive dark overlay** — gradient band behind text with configurable opacity
+- **Watermark system** — upload your logo (PNG with transparency), control opacity, size, and position
+- **3 export resolutions** — Low (1080×1080), Medium (1920×1080), High (2048×2048)
+- **Anti-fingerprint noise grain** — imperceptible pixel noise applied on export to break perceptual hashing
+- **Zero metadata output** — canvas-rendered exports contain no EXIF, GPS, software tags, or AI markers
+- **100% client-side** — nothing is uploaded, processed, or stored on any server
 
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
+## Tech Stack
 
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+| Layer       | Technology                  |
+|-------------|-----------------------------|
+| Framework   | React 19 + TypeScript       |
+| Build       | Vite                        |
+| Styling     | Tailwind CSS v4             |
+| Rendering   | HTML Canvas API             |
+| Fonts       | Self-hosted (SIL OFL)       |
+
+## Getting Started
+
+```bash
+# Clone the repository
+git clone https://github.com/a-ramirezzz/ghostframe.git
+cd ghostframe
+
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+Open `http://localhost:5173` in your browser. That's it — no API keys, no environment variables, no backend.
+
+## Export Details
+
+Every exported image is:
+
+| Property            | Value                                      |
+|---------------------|--------------------------------------------|
+| EXIF metadata       | None                                       |
+| XMP metadata        | None                                       |
+| C2PA/AI markers     | None                                       |
+| GPS coordinates     | None                                       |
+| Software tag        | None                                       |
+| ICC Profile         | sRGB (standard browser profile)            |
+| Noise grain         | Applied (imperceptible, anti-fingerprint)  |
+| Format              | JPEG or PNG (user choice)                  |
+
+## Project Structure
+
+```
+ghostframe/
+├── src/
+│   ├── components/
+│   │   ├── Canvas/          # Image preview and canvas rendering
+│   │   ├── Controls/        # Shared control components
+│   │   ├── ExportPanel/     # Resolution, format, and download
+│   │   ├── FilterPanel/     # Visual filter selection and preview
+│   │   ├── FontPicker/      # Font selection
+│   │   ├── Layout/          # App shell and sidebar
+│   │   ├── TextEditor/      # Quote, author, and typography controls
+│   │   └── WatermarkLayer/  # Logo upload and positioning
+│   ├── hooks/                # State management hooks
+│   ├── utils/                # Filters, rendering, noise, export
+│   ├── types/                # TypeScript interfaces
+│   └── assets/
+│       ├── fonts/            # Self-hosted font files
+│       └── watermarks/       # Watermark assets
+├── public/
+│   └── ghostframe-icon.png
+├── FONT_LICENSES.md
+└── README.md
+```
+
+## License
+
+MIT
