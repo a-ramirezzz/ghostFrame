@@ -5,8 +5,8 @@ function drawOverlay(
   canvasWidth: number,
   canvasHeight: number,
   config: TextConfig,
+  bandHeight: number,
 ) {
-  const bandHeight = canvasHeight * 0.4
   let y: number
 
   switch (config.position) {
@@ -64,16 +64,63 @@ function wrapText(
   return lines
 }
 
-function drawText(
+function truncateToWidth(
+  ctx: CanvasRenderingContext2D,
+  text: string,
+  maxWidth: number,
+): string {
+  if (ctx.measureText(text).width <= maxWidth) return text
+
+  let truncated = text
+  while (truncated.length > 0 && ctx.measureText(`${truncated}…`).width > maxWidth) {
+    truncated = truncated.slice(0, -1)
+  }
+
+  return `${truncated}…`
+}
+
+function hexToRgb(hex: string): { r: number; g: number; b: number } {
+  const normalized = hex.replace("#", "")
+  const full =
+    normalized.length === 3
+      ? normalized
+          .split("")
+          .map((char) => char + char)
+          .join("")
+      : normalized
+
+  const r = parseInt(full.slice(0, 2), 16)
+  const g = parseInt(full.slice(2, 4), 16)
+  const b = parseInt(full.slice(4, 6), 16)
+
+  return {
+    r: Number.isNaN(r) ? 255 : r,
+    g: Number.isNaN(g) ? 255 : g,
+    b: Number.isNaN(b) ? 255 : b,
+  }
+}
+
+interface TextMetrics {
+  x: number
+  scaledFontSize: number
+  lines: string[]
+  lineHeight: number
+  startY: number
+  maxWidth: number
+  authorLine: string | null
+  authorFontSize: number
+  authorY: number
+}
+
+function measureText(
   ctx: CanvasRenderingContext2D,
   canvasWidth: number,
   canvasHeight: number,
   config: TextConfig,
-) {
+): TextMetrics {
   const scaledFontSize = (config.fontSize / 600) * canvasWidth
 
   ctx.font = `${scaledFontSize}px "${config.fontFamily}"`
-  ctx.fillStyle = config.color
   ctx.textAlign = config.alignment
 
   let x: number
@@ -108,6 +155,31 @@ function drawText(
       break
   }
 
+  const authorFontSize = scaledFontSize * 0.58
+  let authorLine: string | null = null
+  let authorY = 0
+
+  const trimmedAuthor = config.author?.trim()
+  if (trimmedAuthor) {
+    ctx.font = `${authorFontSize}px "${config.fontFamily}"`
+    authorLine = truncateToWidth(ctx, `— ${trimmedAuthor}`, maxWidth)
+    authorY = startY + (lines.length - 1) * lineHeight + lineHeight * 1.1
+  }
+
+  return { x, scaledFontSize, lines, lineHeight, startY, maxWidth, authorLine, authorFontSize, authorY }
+}
+
+function drawMainText(
+  ctx: CanvasRenderingContext2D,
+  config: TextConfig,
+  metrics: TextMetrics,
+) {
+  const { x, scaledFontSize, lines, lineHeight, startY } = metrics
+
+  ctx.font = `${scaledFontSize}px "${config.fontFamily}"`
+  ctx.fillStyle = config.color
+  ctx.textAlign = config.alignment
+
   ctx.shadowColor = "rgba(0,0,0,0.7)"
   ctx.shadowBlur = scaledFontSize * 0.15
   ctx.shadowOffsetX = 0
@@ -123,6 +195,33 @@ function drawText(
   ctx.shadowOffsetY = 0
 }
 
+function drawAuthor(
+  ctx: CanvasRenderingContext2D,
+  config: TextConfig,
+  metrics: TextMetrics,
+) {
+  const { x, authorLine, authorFontSize, authorY } = metrics
+  if (!authorLine) return
+
+  const { r, g, b } = hexToRgb(config.color)
+
+  ctx.font = `${authorFontSize}px "${config.fontFamily}"`
+  ctx.fillStyle = `rgba(${r}, ${g}, ${b}, 0.75)`
+  ctx.textAlign = config.alignment
+
+  ctx.shadowColor = "rgba(0,0,0,0.7)"
+  ctx.shadowBlur = authorFontSize * 0.15
+  ctx.shadowOffsetX = 0
+  ctx.shadowOffsetY = authorFontSize * 0.05
+
+  ctx.fillText(authorLine, x, authorY)
+
+  ctx.shadowColor = "transparent"
+  ctx.shadowBlur = 0
+  ctx.shadowOffsetX = 0
+  ctx.shadowOffsetY = 0
+}
+
 export function renderTextOnCanvas(
   ctx: CanvasRenderingContext2D,
   canvasWidth: number,
@@ -131,9 +230,16 @@ export function renderTextOnCanvas(
 ): void {
   if (!config.content) return
 
+  const metrics = measureText(ctx, canvasWidth, canvasHeight, config)
+
   if (config.showOverlay) {
-    drawOverlay(ctx, canvasWidth, canvasHeight, config)
+    let bandHeight = canvasHeight * 0.4
+    if (metrics.authorLine) {
+      bandHeight += metrics.authorFontSize * 1.5
+    }
+    drawOverlay(ctx, canvasWidth, canvasHeight, config, bandHeight)
   }
 
-  drawText(ctx, canvasWidth, canvasHeight, config)
+  drawMainText(ctx, config, metrics)
+  drawAuthor(ctx, config, metrics)
 }

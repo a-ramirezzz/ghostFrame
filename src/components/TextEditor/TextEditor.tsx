@@ -23,6 +23,10 @@ function TextEditor({ textConfig, updateTextConfig }: TextEditorProps) {
     updateTextConfig({ content: event.target.value })
   }
 
+  const handleAuthorChange = (event: ChangeEvent<HTMLInputElement>) => {
+    updateTextConfig({ author: event.target.value })
+  }
+
   const handleFontChange = (event: ChangeEvent<HTMLSelectElement>) => {
     updateTextConfig({ fontFamily: event.target.value })
   }
@@ -41,13 +45,27 @@ function TextEditor({ textConfig, updateTextConfig }: TextEditorProps) {
 
   return (
     <div className="flex flex-col gap-3">
-      <textarea
-        value={textConfig.content}
-        onChange={handleContentChange}
-        placeholder="Write your stoic quote..."
-        rows={4}
-        className="w-full resize-none rounded-md border border-gray-700 bg-[#1a1a1a] p-2 text-sm text-white transition focus:border-blue-500 focus:outline-none"
-      />
+      <div>
+        <span className="mb-1 block text-xs text-gray-400">Quote</span>
+        <textarea
+          value={textConfig.content}
+          onChange={handleContentChange}
+          placeholder="Write your stoic quote..."
+          rows={4}
+          className="w-full resize-none rounded-md border border-gray-700 bg-[#1a1a1a] p-2 text-sm text-white transition focus:border-blue-500 focus:outline-none"
+        />
+      </div>
+
+      <div>
+        <span className="mb-1 block text-xs text-gray-400">Attribution</span>
+        <input
+          type="text"
+          value={textConfig.author}
+          onChange={handleAuthorChange}
+          placeholder="Author (e.g., Marco Aurelio)"
+          className="w-full rounded-md border border-gray-700 bg-[#1a1a1a] px-3 py-2 text-sm text-white transition focus:border-blue-500 focus:outline-none"
+        />
+      </div>
 
       <select
         value={textConfig.fontFamily}
