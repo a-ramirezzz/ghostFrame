@@ -15,59 +15,59 @@
 }
 
 input[type="range"] {
-  -webkit-appearance: none;
-  appearance: none;
-  background: transparent;
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  background: transparent !important;
   cursor: pointer;
-  height: 20px;
+  height: 24px;
   width: 100%;
 }
 
-input[type="range"]::-webkit-slider-track {
-  height: 4px;
-  background: #3d3830;
-  border-radius: 2px;
+input[type="range"]::-webkit-slider-runnable-track {
+  height: 6px !important;
+  background: rgba(200, 164, 78, 0.25) !important;
+  border-radius: 3px !important;
+  border: none !important;
 }
 
 input[type="range"]::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 16px;
-  height: 16px;
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
   background: #c8a44e;
   border: 2px solid #0c0b09;
   margin-top: -6px;
-  box-shadow: 0 0 4px rgba(200, 164, 78, 0.3);
+  box-shadow: 0 0 6px rgba(200, 164, 78, 0.4);
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
 input[type="range"]::-webkit-slider-thumb:hover {
   transform: scale(1.25);
-  box-shadow: 0 0 8px rgba(200, 164, 78, 0.5);
+  box-shadow: 0 0 10px rgba(200, 164, 78, 0.6);
 }
 
-/* Firefox support */
 input[type="range"]::-moz-range-track {
-  height: 4px;
-  background: #3d3830;
-  border-radius: 2px;
-  border: none;
+  height: 6px !important;
+  background: rgba(200, 164, 78, 0.25) !important;
+  border-radius: 3px !important;
+  border: none !important;
 }
 
 input[type="range"]::-moz-range-thumb {
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
   background: #c8a44e;
   border: 2px solid #0c0b09;
-  box-shadow: 0 0 4px rgba(200, 164, 78, 0.3);
+  box-shadow: 0 0 6px rgba(200, 164, 78, 0.4);
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
 input[type="range"]::-moz-range-thumb:hover {
   transform: scale(1.25);
-  box-shadow: 0 0 8px rgba(200, 164, 78, 0.5);
+  box-shadow: 0 0 10px rgba(200, 164, 78, 0.6);
 }
 
 .select-ghost {
