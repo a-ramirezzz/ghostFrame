@@ -1,6 +1,12 @@
+import DropZone from "../Canvas/DropZone"
+import ImageCanvas from "../Canvas/ImageCanvas"
+import useImageLoader from "../../hooks/useImageLoader"
+import ImageControls from "./ImageControls"
 import SidebarSection from "./SidebarSection"
 
 function Layout() {
+  const { originalImage, fileName, loadImage } = useImageLoader()
+
   return (
     <div className="flex h-screen bg-[#0a0a0a]">
       <aside className="w-80 shrink-0 overflow-y-auto border-r border-[#2a2a2a] bg-[#141414] p-4">
@@ -13,7 +19,11 @@ function Layout() {
 
         <div className="flex flex-col gap-4">
           <SidebarSection title="Image">
-            <p className="text-sm text-gray-500">Upload your base image</p>
+            <ImageControls
+              image={originalImage}
+              fileName={fileName}
+              onImageLoad={loadImage}
+            />
           </SidebarSection>
 
           <SidebarSection title="Text">
@@ -35,12 +45,11 @@ function Layout() {
       </aside>
 
       <main className="flex flex-1 items-center justify-center bg-[#111111] p-8">
-        <div className="flex aspect-square w-full max-w-[600px] flex-col items-center justify-center rounded-lg border border-dashed border-gray-600">
-          <span className="text-6xl">📷</span>
-          <p className="mt-4 text-sm text-gray-400">
-            Drop your image here or click to upload
-          </p>
-        </div>
+        {originalImage ? (
+          <ImageCanvas image={originalImage} />
+        ) : (
+          <DropZone onImageLoad={loadImage} />
+        )}
       </main>
     </div>
   )
