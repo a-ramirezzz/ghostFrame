@@ -1,13 +1,15 @@
 import { useEffect, useRef } from "react"
-import type { TextConfig } from "../../types"
+import type { TextConfig, WatermarkConfig } from "../../types"
 import { renderTextOnCanvas } from "../../utils/renderText"
+import { renderWatermarkOnCanvas } from "../../utils/renderWatermark"
 
 interface ImageCanvasProps {
   image: HTMLImageElement | null
   textConfig: TextConfig
+  watermarkConfig: WatermarkConfig
 }
 
-function ImageCanvas({ image, textConfig }: ImageCanvasProps) {
+function ImageCanvas({ image, textConfig, watermarkConfig }: ImageCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
   useEffect(() => {
@@ -34,12 +36,13 @@ function ImageCanvas({ image, textConfig }: ImageCanvasProps) {
       ctx.clearRect(0, 0, canvas.width, canvas.height)
       ctx.drawImage(image, 0, 0)
       renderTextOnCanvas(ctx, canvas.width, canvas.height, textConfig)
+      renderWatermarkOnCanvas(ctx, canvas.width, canvas.height, watermarkConfig)
     })()
 
     return () => {
       cancelled = true
     }
-  }, [image, textConfig])
+  }, [image, textConfig, watermarkConfig])
 
   if (!image) return null
 

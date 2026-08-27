@@ -14,6 +14,13 @@ export interface TextConfig {
   overlayOpacity: number
 }
 
+export interface WatermarkConfig {
+  image: HTMLImageElement | null
+  opacity: number
+  size: number
+  position: 'bottom-right' | 'bottom-left' | 'top-right' | 'top-left' | 'center'
+}
+
 export const AVAILABLE_FONTS = [
   { name: 'Playfair Display', label: 'Playfair Display' },
   { name: 'Montserrat', label: 'Montserrat' },

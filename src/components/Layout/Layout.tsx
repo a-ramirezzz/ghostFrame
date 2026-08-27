@@ -1,14 +1,18 @@
 import DropZone from "../Canvas/DropZone"
 import ImageCanvas from "../Canvas/ImageCanvas"
 import TextEditor from "../TextEditor/TextEditor"
+import WatermarkEditor from "../WatermarkLayer/WatermarkEditor"
 import useImageLoader from "../../hooks/useImageLoader"
 import useTextConfig from "../../hooks/useTextConfig"
+import useWatermarkConfig from "../../hooks/useWatermarkConfig"
 import ImageControls from "./ImageControls"
 import SidebarSection from "./SidebarSection"
 
 function Layout() {
   const { originalImage, fileName, loadImage } = useImageLoader()
   const { textConfig, updateTextConfig } = useTextConfig()
+  const { watermarkConfig, loadWatermark, removeWatermark, updateWatermarkConfig } =
+    useWatermarkConfig()
 
   return (
     <div className="flex h-screen bg-[#0a0a0a]">
@@ -38,7 +42,12 @@ function Layout() {
           </SidebarSection>
 
           <SidebarSection title="Watermark">
-            <p className="text-sm text-gray-500">Add your logo</p>
+            <WatermarkEditor
+              watermarkConfig={watermarkConfig}
+              loadWatermark={loadWatermark}
+              removeWatermark={removeWatermark}
+              updateWatermarkConfig={updateWatermarkConfig}
+            />
           </SidebarSection>
 
           <SidebarSection title="Export">
@@ -49,7 +58,11 @@ function Layout() {
 
       <main className="flex flex-1 items-center justify-center bg-[#111111] p-8">
         {originalImage ? (
-          <ImageCanvas image={originalImage} textConfig={textConfig} />
+          <ImageCanvas
+            image={originalImage}
+            textConfig={textConfig}
+            watermarkConfig={watermarkConfig}
+          />
         ) : (
           <DropZone onImageLoad={loadImage} />
         )}
