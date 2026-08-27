@@ -93,6 +93,12 @@ ghostframe/
 └── README.md
 ```
 
+## Contributing
+
+GhostFrame is open source and contributions are welcome. Whether it's a bug fix, a new filter, font support, or a UI improvement — all PRs are appreciated.
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on how to get started.
+
 ## License
 
 MIT
