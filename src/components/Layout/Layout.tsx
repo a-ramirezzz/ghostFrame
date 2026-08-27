@@ -1,11 +1,14 @@
 import DropZone from "../Canvas/DropZone"
 import ImageCanvas from "../Canvas/ImageCanvas"
+import TextEditor from "../TextEditor/TextEditor"
 import useImageLoader from "../../hooks/useImageLoader"
+import useTextConfig from "../../hooks/useTextConfig"
 import ImageControls from "./ImageControls"
 import SidebarSection from "./SidebarSection"
 
 function Layout() {
   const { originalImage, fileName, loadImage } = useImageLoader()
+  const { textConfig, updateTextConfig } = useTextConfig()
 
   return (
     <div className="flex h-screen bg-[#0a0a0a]">
@@ -27,7 +30,7 @@ function Layout() {
           </SidebarSection>
 
           <SidebarSection title="Text">
-            <p className="text-sm text-gray-500">Configure your quote text</p>
+            <TextEditor textConfig={textConfig} updateTextConfig={updateTextConfig} />
           </SidebarSection>
 
           <SidebarSection title="Filters">
@@ -46,7 +49,7 @@ function Layout() {
 
       <main className="flex flex-1 items-center justify-center bg-[#111111] p-8">
         {originalImage ? (
-          <ImageCanvas image={originalImage} />
+          <ImageCanvas image={originalImage} textConfig={textConfig} />
         ) : (
           <DropZone onImageLoad={loadImage} />
         )}
