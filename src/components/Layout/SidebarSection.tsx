@@ -8,7 +8,8 @@ interface SidebarSectionProps {
 function SidebarSection({ title, children }: SidebarSectionProps) {
   return (
     <div>
-      <h2 className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400">
+      <h2 className="mb-2 text-xs font-medium tracking-wider text-[#9a9484]">
+        <span className="mr-2 inline-block h-3 w-1 rounded-full bg-[#c8a44e] opacity-40" />
         {title}
       </h2>
       {children}

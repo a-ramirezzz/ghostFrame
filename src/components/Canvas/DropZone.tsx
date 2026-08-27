@@ -41,14 +41,35 @@ function DropZone({ onImageLoad }: DropZoneProps) {
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
-      className={`flex aspect-square w-full max-w-[600px] cursor-pointer flex-col items-center justify-center rounded-lg border border-dashed transition-colors duration-150 ${
-        isDragging ? "border-blue-500" : "border-gray-600"
+      className={`group flex aspect-square w-full max-w-[600px] cursor-pointer flex-col items-center justify-center rounded-xl border transition-all duration-300 ${
+        isDragging
+          ? "border-[#c8a44e] bg-[rgba(200,164,78,0.04)]"
+          : "border-[#2a2721] bg-transparent hover:border-[#3d3830] hover:bg-[#1a181408]"
       }`}
     >
-      <span className="text-6xl">📷</span>
-      <p className="mt-4 text-sm text-gray-400">
-        Drop your image here or click to upload
+      <svg
+        width="32"
+        height="32"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke={isDragging ? "#c8a44e" : "#6b6559"}
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className="transition-colors duration-300"
+      >
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+        <polyline points="17 8 12 3 7 8" />
+        <line x1="12" y1="3" x2="12" y2="15" />
+      </svg>
+      <p
+        className={`mt-4 text-sm transition-colors duration-300 ${
+          isDragging ? "text-[#c8a44e]" : "text-[#6b6559]"
+        }`}
+      >
+        Drop image or click to browse
       </p>
+      <p className="mt-1 text-xs text-[#5a5449]">JPG, PNG, WebP</p>
       <input
         ref={inputRef}
         type="file"

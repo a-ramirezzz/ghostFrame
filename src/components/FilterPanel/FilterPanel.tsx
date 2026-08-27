@@ -73,10 +73,10 @@ function FilterPanel({
               className="flex cursor-pointer flex-col gap-1"
             >
               <div
-                className={`aspect-square overflow-hidden rounded-md transition ${
+                className={`aspect-square overflow-hidden rounded-lg transition-all duration-200 ${
                   isSelected
-                    ? "ring-2 ring-blue-500"
-                    : "ring-1 ring-gray-700 hover:ring-gray-500"
+                    ? "ring-2 ring-[#c8a44e]"
+                    : "ring-1 ring-[#2a2721] hover:ring-[#3d3830]"
                 }`}
               >
                 {thumbnail ? (
@@ -86,10 +86,12 @@ function FilterPanel({
                     className="h-full w-full object-cover"
                   />
                 ) : (
-                  <div className="h-full w-full bg-[#1a1a1a]" />
+                  <div className="h-full w-full bg-[#1a1814]" />
                 )}
               </div>
-              <span className="text-center text-xs text-gray-300">{filter.label}</span>
+              <span className={`text-center text-xs ${isSelected ? "text-[#c8a44e]" : "text-[#9a9484]"}`}>
+                {filter.label}
+              </span>
             </button>
           )
         })}
@@ -97,7 +99,7 @@ function FilterPanel({
 
       {filterConfig.active !== "none" && (
         <div className="flex items-center gap-2">
-          <span className="text-xs text-gray-400">Intensity</span>
+          <span className="text-xs text-[#9a9484]">Intensity</span>
           <input
             type="range"
             min={0}
@@ -105,9 +107,9 @@ function FilterPanel({
             step={0.05}
             value={filterConfig.intensity}
             onChange={handleIntensityChange}
-            className="w-full accent-blue-500"
+            className="w-full"
           />
-          <span className="w-8 text-right text-xs text-gray-300">
+          <span className="w-8 text-right text-xs text-[#e8e2d6]">
             {Math.round(filterConfig.intensity * 100)}%
           </span>
         </div>

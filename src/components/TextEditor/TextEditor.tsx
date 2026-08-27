@@ -46,31 +46,31 @@ function TextEditor({ textConfig, updateTextConfig }: TextEditorProps) {
   return (
     <div className="flex flex-col gap-3">
       <div>
-        <span className="mb-1 block text-xs text-gray-400">Quote</span>
+        <span className="mb-1 block text-xs text-[#9a9484]">Quote</span>
         <textarea
           value={textConfig.content}
           onChange={handleContentChange}
           placeholder="Write your stoic quote..."
           rows={4}
-          className="w-full resize-none rounded-md border border-gray-700 bg-[#1a1a1a] p-2 text-sm text-white transition focus:border-blue-500 focus:outline-none"
+          className="w-full resize-none rounded-md border border-[#2a2721] bg-[#1a1814] p-2 text-sm text-[#e8e2d6] placeholder-[#5a5449] transition-all duration-200 focus:border-[#c8a44e] focus:outline-none focus:[box-shadow:0_0_0_2px_rgba(200,164,78,0.1)]"
         />
       </div>
 
       <div>
-        <span className="mb-1 block text-xs text-gray-400">Attribution</span>
+        <span className="mb-1 block text-xs text-[#9a9484]">Attribution</span>
         <input
           type="text"
           value={textConfig.author}
           onChange={handleAuthorChange}
           placeholder="Author (e.g., Marco Aurelio)"
-          className="w-full rounded-md border border-gray-700 bg-[#1a1a1a] px-3 py-2 text-sm text-white transition focus:border-blue-500 focus:outline-none"
+          className="w-full rounded-md border border-[#2a2721] bg-[#1a1814] px-3 py-2 text-sm text-[#e8e2d6] placeholder-[#5a5449] transition-all duration-200 focus:border-[#c8a44e] focus:outline-none focus:[box-shadow:0_0_0_2px_rgba(200,164,78,0.1)]"
         />
       </div>
 
       <select
         value={textConfig.fontFamily}
         onChange={handleFontChange}
-        className="w-full rounded-md border border-gray-700 bg-[#1a1a1a] p-2 text-sm text-white"
+        className="select-ghost w-full rounded-md border border-[#2a2721] bg-[#1a1814] p-2 text-sm text-[#e8e2d6] transition-all duration-200 focus:border-[#c8a44e] focus:outline-none focus:[box-shadow:0_0_0_2px_rgba(200,164,78,0.1)]"
       >
         {AVAILABLE_FONTS.map((font) => (
           <option key={font.name} value={font.name}>
@@ -80,7 +80,7 @@ function TextEditor({ textConfig, updateTextConfig }: TextEditorProps) {
       </select>
 
       <div className="flex items-center gap-2">
-        <span className="text-xs text-gray-400">Size</span>
+        <span className="text-xs text-[#9a9484]">Size</span>
         <input
           type="range"
           min={16}
@@ -88,15 +88,15 @@ function TextEditor({ textConfig, updateTextConfig }: TextEditorProps) {
           step={2}
           value={textConfig.fontSize}
           onChange={handleFontSizeChange}
-          className="w-full accent-blue-500"
+          className="w-full"
         />
-        <span className="w-8 text-right text-xs text-gray-300">
+        <span className="w-8 text-right text-xs text-[#e8e2d6]">
           {textConfig.fontSize}
         </span>
       </div>
 
       <div className="flex items-center justify-between">
-        <span className="text-xs text-gray-400">Color</span>
+        <span className="text-xs text-[#9a9484]">Color</span>
         <input
           type="color"
           value={textConfig.color}
@@ -106,17 +106,17 @@ function TextEditor({ textConfig, updateTextConfig }: TextEditorProps) {
       </div>
 
       <div>
-        <span className="mb-1 block text-xs text-gray-400">Position</span>
+        <span className="mb-1 block text-xs text-[#9a9484]">Position</span>
         <div className="flex gap-2">
           {POSITIONS.map((position) => (
             <button
               key={position.value}
               type="button"
               onClick={() => updateTextConfig({ position: position.value })}
-              className={`rounded-md px-3 py-1.5 text-xs transition ${
+              className={`rounded-md border px-3 py-1.5 text-xs transition-all duration-200 ${
                 textConfig.position === position.value
-                  ? "bg-blue-600 text-white"
-                  : "bg-[#1a1a1a] text-gray-400 hover:text-white"
+                  ? "border-[rgba(200,164,78,0.35)] bg-[rgba(200,164,78,0.12)] text-[#c8a44e]"
+                  : "border-[#2a2721] bg-[#1a1814] text-[#9a9484] hover:border-[#3d3830] hover:bg-[#221f1a] hover:text-[#e8e2d6]"
               }`}
             >
               {position.label}
@@ -126,17 +126,17 @@ function TextEditor({ textConfig, updateTextConfig }: TextEditorProps) {
       </div>
 
       <div>
-        <span className="mb-1 block text-xs text-gray-400">Alignment</span>
+        <span className="mb-1 block text-xs text-[#9a9484]">Alignment</span>
         <div className="flex gap-2">
           {ALIGNMENTS.map((alignment) => (
             <button
               key={alignment.value}
               type="button"
               onClick={() => updateTextConfig({ alignment: alignment.value })}
-              className={`rounded-md px-3 py-1.5 text-xs transition ${
+              className={`rounded-md border px-3 py-1.5 text-xs transition-all duration-200 ${
                 textConfig.alignment === alignment.value
-                  ? "bg-blue-600 text-white"
-                  : "bg-[#1a1a1a] text-gray-400 hover:text-white"
+                  ? "border-[rgba(200,164,78,0.35)] bg-[rgba(200,164,78,0.12)] text-[#c8a44e]"
+                  : "border-[#2a2721] bg-[#1a1814] text-[#9a9484] hover:border-[#3d3830] hover:bg-[#221f1a] hover:text-[#e8e2d6]"
               }`}
             >
               {alignment.label}
@@ -146,18 +146,18 @@ function TextEditor({ textConfig, updateTextConfig }: TextEditorProps) {
       </div>
 
       <div className="flex items-center justify-between">
-        <span className="text-xs text-gray-400">Dark overlay</span>
+        <span className="text-xs text-[#9a9484]">Dark overlay</span>
         <div
           role="switch"
           aria-checked={textConfig.showOverlay}
           onClick={() => updateTextConfig({ showOverlay: !textConfig.showOverlay })}
-          className={`relative h-5 w-10 cursor-pointer rounded-full transition ${
-            textConfig.showOverlay ? "bg-blue-600" : "bg-gray-600"
+          className={`relative h-5 w-10 cursor-pointer rounded-full transition-all duration-200 ${
+            textConfig.showOverlay ? "bg-[#c8a44e]" : "bg-[#2a2721]"
           }`}
         >
           <div
-            className={`absolute top-0.5 h-4 w-4 rounded-full bg-white transition-all ${
-              textConfig.showOverlay ? "left-5" : "left-0.5"
+            className={`absolute top-0.5 h-4 w-4 rounded-full transition-all duration-200 ${
+              textConfig.showOverlay ? "left-5 bg-[#12110e]" : "left-0.5 bg-[#6b6559]"
             }`}
           />
         </div>
@@ -165,7 +165,7 @@ function TextEditor({ textConfig, updateTextConfig }: TextEditorProps) {
 
       {textConfig.showOverlay && (
         <div className="flex items-center gap-2">
-          <span className="text-xs text-gray-400">Overlay opacity</span>
+          <span className="text-xs text-[#9a9484]">Overlay opacity</span>
           <input
             type="range"
             min={0.1}
@@ -173,9 +173,9 @@ function TextEditor({ textConfig, updateTextConfig }: TextEditorProps) {
             step={0.05}
             value={textConfig.overlayOpacity}
             onChange={handleOverlayOpacityChange}
-            className="w-full accent-blue-500"
+            className="w-full"
           />
-          <span className="w-8 text-right text-xs text-gray-300">
+          <span className="w-8 text-right text-xs text-[#e8e2d6]">
             {Math.round(textConfig.overlayOpacity * 100)}%
           </span>
         </div>

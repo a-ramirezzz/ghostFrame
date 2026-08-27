@@ -26,13 +26,28 @@ function Layout() {
   }
 
   return (
-    <div className="flex h-screen bg-[#0a0a0a]">
-      <aside className="w-80 shrink-0 overflow-y-auto border-r border-[#2a2a2a] bg-[#141414] p-4">
-        <div className="mb-4 border-b border-[#2a2a2a] pb-4">
-          <h1 className="text-lg font-bold text-white">
-            <span className="mr-2">👻</span>
-            GhostFrame
+    <div className="relative flex h-screen bg-[#0c0b09]">
+      <div
+        className="pointer-events-none absolute top-0 left-0 right-0 h-px"
+        style={{ background: "linear-gradient(to right, transparent, #c8a44e40, transparent)" }}
+      />
+
+      <aside
+        className="sidebar-scroll w-80 shrink-0 overflow-y-auto bg-[#12110e] p-4"
+        style={{ boxShadow: "inset -8px 0 16px -8px rgba(0,0,0,0.3)" }}
+      >
+        <div className="mb-4 pb-4">
+          <h1 className="text-base font-semibold tracking-wide">
+            <span className="text-[#e8e2d6]">Ghost</span>
+            <span className="text-[#c8a44e]">Frame</span>
           </h1>
+          <div
+            className="mt-4 h-px"
+            style={{
+              background:
+                "linear-gradient(to right, transparent, #2a2721, #c8a44e20, #2a2721, transparent)",
+            }}
+          />
         </div>
 
         <div className="flex flex-col gap-4">
@@ -78,14 +93,19 @@ function Layout() {
         </div>
       </aside>
 
-      <main className="flex flex-1 items-center justify-center bg-[#111111] p-8">
+      <main className="flex flex-1 items-center justify-center bg-[#0c0b09] p-8">
         {originalImage ? (
-          <ImageCanvas
-            image={originalImage}
-            textConfig={textConfig}
-            watermarkConfig={watermarkConfig}
-            filterConfig={filterConfig}
-          />
+          <div
+            className="overflow-hidden rounded-md"
+            style={{ boxShadow: "0 4px 24px rgba(0,0,0,0.5)" }}
+          >
+            <ImageCanvas
+              image={originalImage}
+              textConfig={textConfig}
+              watermarkConfig={watermarkConfig}
+              filterConfig={filterConfig}
+            />
+          </div>
         ) : (
           <DropZone onImageLoad={loadImage} />
         )}

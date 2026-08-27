@@ -50,7 +50,7 @@ function WatermarkEditor({
             className="mx-auto flex w-full items-center justify-center rounded-md p-3"
             style={{
               backgroundImage:
-                "repeating-conic-gradient(#2a2a2a 0% 25%, #1a1a1a 0% 50%)",
+                "repeating-conic-gradient(#2a2721 0% 25%, #1a1814 0% 50%)",
               backgroundSize: "20px 20px",
             }}
           >
@@ -64,13 +64,13 @@ function WatermarkEditor({
           <button
             type="button"
             onClick={removeWatermark}
-            className="cursor-pointer self-start text-xs text-red-400 transition hover:text-red-300"
+            className="cursor-pointer self-start text-xs text-[#c45b4f] transition hover:text-[#d4695d]"
           >
             Remove
           </button>
 
           <div className="flex items-center gap-2">
-            <span className="text-xs text-gray-400">Opacity</span>
+            <span className="text-xs text-[#9a9484]">Opacity</span>
             <input
               type="range"
               min={0.05}
@@ -78,15 +78,15 @@ function WatermarkEditor({
               step={0.05}
               value={watermarkConfig.opacity}
               onChange={handleOpacityChange}
-              className="w-full accent-blue-500"
+              className="w-full"
             />
-            <span className="w-8 text-right text-xs text-gray-300">
+            <span className="w-8 text-right text-xs text-[#e8e2d6]">
               {Math.round(watermarkConfig.opacity * 100)}%
             </span>
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="text-xs text-gray-400">Size</span>
+            <span className="text-xs text-[#9a9484]">Size</span>
             <input
               type="range"
               min={5}
@@ -94,15 +94,15 @@ function WatermarkEditor({
               step={1}
               value={watermarkConfig.size}
               onChange={handleSizeChange}
-              className="w-full accent-blue-500"
+              className="w-full"
             />
-            <span className="w-8 text-right text-xs text-gray-300">
+            <span className="w-8 text-right text-xs text-[#e8e2d6]">
               {watermarkConfig.size}%
             </span>
           </div>
 
           <div>
-            <span className="mb-1 block text-xs text-gray-400">Position</span>
+            <span className="mb-1 block text-xs text-[#9a9484]">Position</span>
             <div className="grid w-fit grid-cols-3 grid-rows-3 gap-1.5">
               {POSITIONS.map((position) => (
                 <button
@@ -110,17 +110,17 @@ function WatermarkEditor({
                   type="button"
                   onClick={() => updateWatermarkConfig({ position: position.value })}
                   style={{ gridArea: position.area }}
-                  className={`flex h-7 w-7 cursor-pointer items-center justify-center rounded-md transition ${
+                  className={`flex h-7 w-7 cursor-pointer items-center justify-center rounded-md border transition-all duration-200 ${
                     watermarkConfig.position === position.value
-                      ? "bg-blue-600"
-                      : "border border-gray-700 bg-[#1a1a1a]"
+                      ? "border-[rgba(200,164,78,0.35)] bg-[rgba(200,164,78,0.12)]"
+                      : "border-[#2a2721] bg-[#1a1814] hover:border-[#3d3830]"
                   }`}
                 >
                   <span
                     className={`h-2 w-2 rounded-full ${
                       watermarkConfig.position === position.value
-                        ? "bg-white"
-                        : "bg-gray-500"
+                        ? "bg-[#c8a44e]"
+                        : "bg-[#6b6559]"
                     }`}
                   />
                 </button>
@@ -133,11 +133,12 @@ function WatermarkEditor({
           <button
             type="button"
             onClick={handleClick}
-            className="w-full cursor-pointer rounded-md border border-gray-600 px-4 py-2 text-sm text-gray-300 transition hover:border-gray-400"
+            className="flex w-full cursor-pointer items-center justify-center rounded-lg border border-[#2a2721] bg-[#1a1814] px-4 py-2 text-sm text-[#9a9484] transition-all duration-200 hover:border-[#3d3830] hover:bg-[#221f1a] hover:text-[#e8e2d6]"
           >
+            <span className="mr-2">+</span>
             Upload Logo (PNG)
           </button>
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-[#6b6559]">
             Use a PNG with transparent background
           </p>
         </>

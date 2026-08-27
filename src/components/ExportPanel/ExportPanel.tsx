@@ -36,17 +36,19 @@ function ExportPanel({
             <div
               key={resolution}
               onClick={() => onUpdateConfig({ resolution })}
-              className={`flex cursor-pointer items-center justify-between rounded-md border px-3 py-2.5 transition ${
+              className={`flex cursor-pointer items-center justify-between rounded-md border px-3 py-2.5 transition-all duration-200 ${
                 isSelected
-                  ? "border-blue-500/50 bg-blue-600/20 text-blue-400"
-                  : "border-gray-700 bg-[#1a1a1a] text-gray-300 hover:border-gray-500"
+                  ? "border-[rgba(200,164,78,0.3)] bg-[rgba(200,164,78,0.08)]"
+                  : "border-[#2a2721] bg-[#1a1814] hover:border-[#3d3830]"
               }`}
             >
               <div>
-                <div className="text-sm font-medium">{preset.label}</div>
-                <div className="text-xs text-gray-500">{preset.description}</div>
+                <div className={`text-sm font-medium ${isSelected ? "text-[#c8a44e]" : "text-[#e8e2d6]"}`}>
+                  {preset.label}
+                </div>
+                <div className="text-xs text-[#9a9484]">{preset.description}</div>
               </div>
-              <div className="text-xs text-gray-400">
+              <div className="text-xs text-[#6b6559]">
                 {preset.width} × {preset.height}
               </div>
             </div>
@@ -58,10 +60,10 @@ function ExportPanel({
         <button
           type="button"
           onClick={() => onUpdateConfig({ format: "image/jpeg" })}
-          className={`w-1/2 rounded-l-md py-1.5 text-xs transition ${
+          className={`w-1/2 rounded-l-md border py-1.5 text-xs transition-all duration-200 ${
             exportConfig.format === "image/jpeg"
-              ? "bg-blue-600 text-white"
-              : "bg-[#1a1a1a] text-gray-400 hover:text-white"
+              ? "border-[rgba(200,164,78,0.35)] bg-[rgba(200,164,78,0.12)] text-[#c8a44e]"
+              : "border-[#2a2721] bg-[#1a1814] text-[#9a9484] hover:border-[#3d3830] hover:bg-[#221f1a] hover:text-[#e8e2d6]"
           }`}
         >
           JPG
@@ -69,10 +71,10 @@ function ExportPanel({
         <button
           type="button"
           onClick={() => onUpdateConfig({ format: "image/png" })}
-          className={`w-1/2 rounded-r-md py-1.5 text-xs transition ${
+          className={`w-1/2 rounded-r-md border py-1.5 text-xs transition-all duration-200 ${
             exportConfig.format === "image/png"
-              ? "bg-blue-600 text-white"
-              : "bg-[#1a1a1a] text-gray-400 hover:text-white"
+              ? "border-[rgba(200,164,78,0.35)] bg-[rgba(200,164,78,0.12)] text-[#c8a44e]"
+              : "border-[#2a2721] bg-[#1a1814] text-[#9a9484] hover:border-[#3d3830] hover:bg-[#221f1a] hover:text-[#e8e2d6]"
           }`}
         >
           PNG
@@ -81,7 +83,7 @@ function ExportPanel({
 
       {exportConfig.format === "image/jpeg" && (
         <div className="flex items-center gap-2">
-          <span className="text-xs text-gray-400">Quality</span>
+          <span className="text-xs text-[#9a9484]">Quality</span>
           <input
             type="range"
             min={0.5}
@@ -89,9 +91,9 @@ function ExportPanel({
             step={0.05}
             value={exportConfig.quality}
             onChange={handleQualityChange}
-            className="w-full accent-blue-500"
+            className="w-full"
           />
-          <span className="w-8 text-right text-xs text-gray-300">
+          <span className="w-8 text-right text-xs text-[#e8e2d6]">
             {Math.round(exportConfig.quality * 100)}%
           </span>
         </div>
@@ -102,14 +104,21 @@ function ExportPanel({
         onClick={onExport}
         disabled={isDisabled}
         title={!hasImage ? "Upload an image first" : undefined}
-        className={`rounded-md py-3 text-sm font-medium text-white transition ${
-          isDisabled ? "cursor-not-allowed bg-blue-600 opacity-50" : "bg-blue-600 hover:bg-blue-700"
+        className={`rounded-lg py-3 text-sm font-semibold text-[#0c0b09] transition-all duration-200 ${
+          isDisabled
+            ? "cursor-not-allowed bg-[#c8a44e] opacity-40"
+            : isExporting
+              ? "bg-[#c8a44e] opacity-70"
+              : "bg-[#c8a44e] hover:bg-[#d4b35c]"
         }`}
       >
         {isExporting ? <span className="animate-pulse">Exporting...</span> : "Export Image ↓"}
       </button>
 
-      <p className="text-xs text-gray-600">Images are exported without metadata</p>
+      <p className="flex items-center gap-1 text-xs text-[#5a5449]">
+        <span>🔒</span>
+        Images are exported without metadata
+      </p>
     </div>
   )
 }
