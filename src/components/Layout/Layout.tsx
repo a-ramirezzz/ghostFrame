@@ -1,7 +1,9 @@
 import DropZone from "../Canvas/DropZone"
 import ImageCanvas from "../Canvas/ImageCanvas"
+import FilterPanel from "../FilterPanel/FilterPanel"
 import TextEditor from "../TextEditor/TextEditor"
 import WatermarkEditor from "../WatermarkLayer/WatermarkEditor"
+import useFilterConfig from "../../hooks/useFilterConfig"
 import useImageLoader from "../../hooks/useImageLoader"
 import useTextConfig from "../../hooks/useTextConfig"
 import useWatermarkConfig from "../../hooks/useWatermarkConfig"
@@ -13,6 +15,7 @@ function Layout() {
   const { textConfig, updateTextConfig } = useTextConfig()
   const { watermarkConfig, loadWatermark, removeWatermark, updateWatermarkConfig } =
     useWatermarkConfig()
+  const { filterConfig, setFilter, setIntensity } = useFilterConfig()
 
   return (
     <div className="flex h-screen bg-[#0a0a0a]">
@@ -38,7 +41,12 @@ function Layout() {
           </SidebarSection>
 
           <SidebarSection title="Filters">
-            <p className="text-sm text-gray-500">Apply visual filters</p>
+            <FilterPanel
+              filterConfig={filterConfig}
+              onSelectFilter={setFilter}
+              onIntensityChange={setIntensity}
+              previewImage={originalImage}
+            />
           </SidebarSection>
 
           <SidebarSection title="Watermark">
@@ -62,6 +70,7 @@ function Layout() {
             image={originalImage}
             textConfig={textConfig}
             watermarkConfig={watermarkConfig}
+            filterConfig={filterConfig}
           />
         ) : (
           <DropZone onImageLoad={loadImage} />

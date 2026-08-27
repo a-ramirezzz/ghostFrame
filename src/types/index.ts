@@ -28,3 +28,19 @@ export const AVAILABLE_FONTS = [
   { name: 'Cinzel', label: 'Cinzel' },
   { name: 'Raleway', label: 'Raleway' },
 ] as const
+
+export type FilterName = 'none' | 'stoic-dark' | 'marble' | 'golden-hour' | 'noir' | 'mist'
+
+export interface FilterConfig {
+  active: FilterName
+  intensity: number
+}
+
+export const AVAILABLE_FILTERS: { name: FilterName; label: string; description: string }[] = [
+  { name: 'none', label: 'Original', description: 'No filter applied' },
+  { name: 'stoic-dark', label: 'Stoic Dark', description: 'High contrast, cold tones, vignette' },
+  { name: 'marble', label: 'Marble', description: 'Desaturated with subtle sepia' },
+  { name: 'golden-hour', label: 'Golden Hour', description: 'Warm tones, soft glow' },
+  { name: 'noir', label: 'Noir', description: 'Black & white, strong contrast' },
+  { name: 'mist', label: 'Mist', description: 'Faded, low saturation, dreamy' },
+]
