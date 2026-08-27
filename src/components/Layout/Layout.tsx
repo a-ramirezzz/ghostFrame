@@ -1,8 +1,10 @@
 import DropZone from "../Canvas/DropZone"
 import ImageCanvas from "../Canvas/ImageCanvas"
+import ExportPanel from "../ExportPanel/ExportPanel"
 import FilterPanel from "../FilterPanel/FilterPanel"
 import TextEditor from "../TextEditor/TextEditor"
 import WatermarkEditor from "../WatermarkLayer/WatermarkEditor"
+import useExport from "../../hooks/useExport"
 import useFilterConfig from "../../hooks/useFilterConfig"
 import useImageLoader from "../../hooks/useImageLoader"
 import useTextConfig from "../../hooks/useTextConfig"
@@ -16,6 +18,12 @@ function Layout() {
   const { watermarkConfig, loadWatermark, removeWatermark, updateWatermarkConfig } =
     useWatermarkConfig()
   const { filterConfig, setFilter, setIntensity } = useFilterConfig()
+  const { exportConfig, isExporting, updateExportConfig, performExport } = useExport()
+
+  const handleExport = () => {
+    if (!originalImage) return
+    performExport({ originalImage, filterConfig, textConfig, watermarkConfig })
+  }
 
   return (
     <div className="flex h-screen bg-[#0a0a0a]">
@@ -59,7 +67,13 @@ function Layout() {
           </SidebarSection>
 
           <SidebarSection title="Export">
-            <p className="text-sm text-gray-500">Download your creation</p>
+            <ExportPanel
+              exportConfig={exportConfig}
+              isExporting={isExporting}
+              onUpdateConfig={updateExportConfig}
+              onExport={handleExport}
+              hasImage={originalImage !== null}
+            />
           </SidebarSection>
         </div>
       </aside>
