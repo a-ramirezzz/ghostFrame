@@ -9,6 +9,7 @@ import useFilterConfig from "../../hooks/useFilterConfig"
 import useImageLoader from "../../hooks/useImageLoader"
 import useTextConfig from "../../hooks/useTextConfig"
 import useWatermarkConfig from "../../hooks/useWatermarkConfig"
+import useZoom from "../../hooks/useZoom"
 import ImageControls from "./ImageControls"
 import SidebarSection from "./SidebarSection"
 
@@ -19,6 +20,15 @@ function Layout() {
     useWatermarkConfig()
   const { filterConfig, setFilter, setIntensity } = useFilterConfig()
   const { exportConfig, isExporting, updateExportConfig, performExport } = useExport()
+  const { zoom, zoomIn, zoomOut, resetZoom } = useZoom()
+
+  const handleWheel = (event: React.WheelEvent) => {
+    if (event.ctrlKey || event.metaKey) {
+      event.preventDefault()
+      if (event.deltaY < 0) zoomIn()
+      else zoomOut()
+    }
+  }
 
   const handleExport = () => {
     if (!originalImage) return
@@ -98,21 +108,45 @@ function Layout() {
         </div>
       </aside>
 
-      <main className="flex flex-1 items-center justify-center bg-[#0c0b09] p-8">
+      <main
+        className="relative flex h-screen flex-1 items-center justify-center overflow-hidden bg-[#0c0b09]"
+        onWheel={handleWheel}
+      >
         {originalImage ? (
-          <div
-            className="overflow-hidden rounded-md"
-            style={{ boxShadow: "0 4px 24px rgba(0,0,0,0.5)" }}
-          >
-            <ImageCanvas
-              image={originalImage}
-              textConfig={textConfig}
-              watermarkConfig={watermarkConfig}
-              filterConfig={filterConfig}
-            />
-          </div>
+          <ImageCanvas
+            image={originalImage}
+            textConfig={textConfig}
+            watermarkConfig={watermarkConfig}
+            filterConfig={filterConfig}
+            zoom={zoom}
+          />
         ) : (
           <DropZone onImageLoad={loadImage} />
+        )}
+
+        {originalImage && (
+          <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 items-center gap-1 rounded-full border border-[#2a2721] bg-[#1a1814] px-2 py-1 shadow-lg">
+            <button
+              type="button"
+              onClick={zoomOut}
+              className="flex h-8 w-8 items-center justify-center rounded-full text-lg text-[#9a9484] transition-all duration-200 hover:bg-[#221f1a] hover:text-[#e8e2d6]"
+            >
+              −
+            </button>
+            <span
+              onClick={resetZoom}
+              className="w-12 cursor-pointer text-center text-xs text-[#9a9484] transition hover:text-[#c8a44e]"
+            >
+              {zoom === 1 ? "Fit" : `${Math.round(zoom * 100)}%`}
+            </span>
+            <button
+              type="button"
+              onClick={zoomIn}
+              className="flex h-8 w-8 items-center justify-center rounded-full text-lg text-[#9a9484] transition-all duration-200 hover:bg-[#221f1a] hover:text-[#e8e2d6]"
+            >
+              +
+            </button>
+          </div>
         )}
       </main>
     </div>

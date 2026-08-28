@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, useState } from "react"
 import type { FilterConfig, TextConfig, WatermarkConfig } from "../../types"
 import { applyFilter } from "../../utils/filters"
 import { renderTextOnCanvas } from "../../utils/renderText"
@@ -9,10 +9,31 @@ interface ImageCanvasProps {
   textConfig: TextConfig
   watermarkConfig: WatermarkConfig
   filterConfig: FilterConfig
+  zoom: number
 }
 
-function ImageCanvas({ image, textConfig, watermarkConfig, filterConfig }: ImageCanvasProps) {
+const CONTAINER_PADDING = 40
+
+function ImageCanvas({ image, textConfig, watermarkConfig, filterConfig, zoom }: ImageCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const [containerSize, setContainerSize] = useState({ width: 0, height: 0 })
+
+  useEffect(() => {
+    const container = containerRef.current
+    if (!container) return
+
+    const updateSize = () => {
+      setContainerSize({ width: container.clientWidth, height: container.clientHeight })
+    }
+
+    updateSize()
+
+    const observer = new ResizeObserver(updateSize)
+    observer.observe(container)
+
+    return () => observer.disconnect()
+  }, [])
 
   useEffect(() => {
     if (!image) return
@@ -68,13 +89,30 @@ function ImageCanvas({ image, textConfig, watermarkConfig, filterConfig }: Image
     }
   }, [image, textConfig, watermarkConfig, filterConfig])
 
-  if (!image) return null
+  if (!image) {
+    return <div ref={containerRef} className="flex h-full w-full items-center justify-center overflow-auto" />
+  }
+
+  const availableWidth = containerSize.width - CONTAINER_PADDING
+  const availableHeight = containerSize.height - CONTAINER_PADDING
+  const scaleX = availableWidth / image.naturalWidth
+  const scaleY = availableHeight / image.naturalHeight
+  const fitScale = Math.min(scaleX, scaleY, 1)
+  const displayWidth = image.naturalWidth * fitScale * zoom
+  const displayHeight = image.naturalHeight * fitScale * zoom
 
   return (
-    <canvas
-      ref={canvasRef}
-      style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain" }}
-    />
+    <div ref={containerRef} className="flex h-full w-full items-center justify-center overflow-auto">
+      <canvas
+        ref={canvasRef}
+        style={{
+          width: displayWidth,
+          height: displayHeight,
+          boxShadow: "0 4px 24px rgba(0,0,0,0.5)",
+          borderRadius: "6px",
+        }}
+      />
+    </div>
   )
 }
 

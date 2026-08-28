@@ -41,7 +41,7 @@ function DropZone({ onImageLoad }: DropZoneProps) {
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
-      className={`group flex aspect-square w-full max-w-[600px] cursor-pointer flex-col items-center justify-center rounded-xl border transition-all duration-300 ${
+      className={`group flex aspect-square w-full max-w-[400px] max-h-[400px] cursor-pointer flex-col items-center justify-center rounded-xl border transition-all duration-300 ${
         isDragging
           ? "border-[#c8a44e] bg-[rgba(200,164,78,0.04)]"
           : "border-[#2a2721] bg-transparent hover:border-[#3d3830] hover:bg-[#1a181408]"
