@@ -6,6 +6,7 @@ export interface GhostFrameState {
 export interface TextConfig {
   content: string
   author: string
+  pageName: string
   fontFamily: string
   fontSize: number
   color: string

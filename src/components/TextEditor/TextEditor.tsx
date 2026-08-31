@@ -27,6 +27,10 @@ function TextEditor({ textConfig, updateTextConfig }: TextEditorProps) {
     updateTextConfig({ author: event.target.value })
   }
 
+  const handlePageNameChange = (event: ChangeEvent<HTMLInputElement>) => {
+    updateTextConfig({ pageName: event.target.value })
+  }
+
   const handleFontChange = (event: ChangeEvent<HTMLSelectElement>) => {
     updateTextConfig({ fontFamily: event.target.value })
   }
@@ -65,6 +69,18 @@ function TextEditor({ textConfig, updateTextConfig }: TextEditorProps) {
           placeholder="Author (e.g., Marco Aurelio)"
           className="w-full rounded-md border border-[#2a2721] bg-[#1a1814] px-3 py-2 text-sm text-[#e8e2d6] placeholder-[#5a5449] transition-all duration-200 focus:border-[#c8a44e] focus:outline-none focus:[box-shadow:0_0_0_2px_rgba(200,164,78,0.1)]"
         />
+      </div>
+
+      <div>
+        <span className="mb-1 block text-xs text-[#9a9484]">Page name</span>
+        <input
+          type="text"
+          value={textConfig.pageName}
+          onChange={handlePageNameChange}
+          placeholder="Your page name (e.g., Estoicismo)"
+          className="w-full rounded-md border border-[#2a2721] bg-[#1a1814] px-3 py-2 text-sm text-[#e8e2d6] placeholder-[#5a5449] transition-all duration-200 focus:border-[#c8a44e] focus:outline-none focus:[box-shadow:0_0_0_2px_rgba(200,164,78,0.1)]"
+        />
+        <span className="mt-1 block text-xs text-[#5a5449]">Displayed as @PAGENAME on the image</span>
       </div>
 
       <select

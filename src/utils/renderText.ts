@@ -110,6 +110,9 @@ interface TextMetrics {
   authorLine: string | null
   authorFontSize: number
   authorY: number
+  pageNameLine: string | null
+  pageNameFontSize: number
+  pageNameY: number
 }
 
 function measureText(
@@ -166,7 +169,36 @@ function measureText(
     authorY = startY + (lines.length - 1) * lineHeight + lineHeight * 1.1
   }
 
-  return { x, scaledFontSize, lines, lineHeight, startY, maxWidth, authorLine, authorFontSize, authorY }
+  const pageNameFontSize = scaledFontSize * 0.4
+  let pageNameLine: string | null = null
+  let pageNameY = 0
+
+  const trimmedPageName = config.pageName?.trim().replace(/^@+/, "")
+  if (trimmedPageName) {
+    ctx.font = `${pageNameFontSize}px "${config.fontFamily}"`
+    pageNameLine = truncateToWidth(ctx, `@${trimmedPageName.toUpperCase()}`, maxWidth)
+
+    if (authorLine) {
+      pageNameY = authorY + pageNameFontSize * 1.5
+    } else {
+      pageNameY = startY + (lines.length - 1) * lineHeight + lineHeight * 1.2
+    }
+  }
+
+  return {
+    x,
+    scaledFontSize,
+    lines,
+    lineHeight,
+    startY,
+    maxWidth,
+    authorLine,
+    authorFontSize,
+    authorY,
+    pageNameLine,
+    pageNameFontSize,
+    pageNameY,
+  }
 }
 
 function drawMainText(
@@ -222,6 +254,33 @@ function drawAuthor(
   ctx.shadowOffsetY = 0
 }
 
+function drawPageName(
+  ctx: CanvasRenderingContext2D,
+  config: TextConfig,
+  metrics: TextMetrics,
+) {
+  const { x, pageNameLine, pageNameFontSize, pageNameY } = metrics
+  if (!pageNameLine) return
+
+  const { r, g, b } = hexToRgb(config.color)
+
+  ctx.font = `${pageNameFontSize}px "${config.fontFamily}"`
+  ctx.fillStyle = `rgba(${r}, ${g}, ${b}, 0.55)`
+  ctx.textAlign = config.alignment
+
+  ctx.shadowColor = "rgba(0,0,0,0.5)"
+  ctx.shadowBlur = pageNameFontSize * 0.12
+  ctx.shadowOffsetX = 0
+  ctx.shadowOffsetY = pageNameFontSize * 0.04
+
+  ctx.fillText(pageNameLine, x, pageNameY)
+
+  ctx.shadowColor = "transparent"
+  ctx.shadowBlur = 0
+  ctx.shadowOffsetX = 0
+  ctx.shadowOffsetY = 0
+}
+
 export function renderTextOnCanvas(
   ctx: CanvasRenderingContext2D,
   canvasWidth: number,
@@ -237,9 +296,13 @@ export function renderTextOnCanvas(
     if (metrics.authorLine) {
       bandHeight += metrics.authorFontSize * 1.5
     }
+    if (metrics.pageNameLine) {
+      bandHeight += metrics.pageNameFontSize * 2
+    }
     drawOverlay(ctx, canvasWidth, canvasHeight, config, bandHeight)
   }
 
   drawMainText(ctx, config, metrics)
   drawAuthor(ctx, config, metrics)
+  drawPageName(ctx, config, metrics)
 }
