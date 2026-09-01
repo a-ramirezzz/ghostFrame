@@ -1,6 +1,14 @@
 <div align="center">
   <img src="public/ghostframe-icon.png" alt="GhostFrame" width="80" />
   <h1>GhostFrame</h1>
+  <p>
+    <img src="https://img.shields.io/badge/license-MIT-blue" alt="MIT License" />
+    <img src="https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white" alt="React 19" />
+    <img src="https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white" alt="TypeScript strict" />
+    <img src="https://img.shields.io/badge/Vite-8-646CFF?logo=vite&logoColor=white" alt="Vite" />
+    <img src="https://img.shields.io/badge/Tailwind-4-06B6D4?logo=tailwindcss&logoColor=white" alt="Tailwind CSS 4" />
+    <img src="https://img.shields.io/badge/100%25-Client--Side-c8a44e" alt="100% Client-Side" />
+  </p>
   <p><strong>Create metadata-free images for social media.</strong></p>
   <p>A client-side image editor built for content creators who need clean, undetectable images — no EXIF, no fingerprints, no traces.</p>
 </div>
