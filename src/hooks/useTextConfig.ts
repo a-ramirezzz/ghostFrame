@@ -7,13 +7,15 @@ const DEFAULT_TEXT_CONFIG: TextConfig = {
   content: "",
   author: "",
   pageName: savedPageName,
-  fontFamily: "Cinzel",
+  fontFamily: "Playfair Display",
   fontSize: 32,
-  color: "#ffffff",
+  color: "#F2EBDD",
   position: "center",
   alignment: "center",
   showOverlay: true,
   overlayOpacity: 0.5,
+  accentColor: "#C8A44E",
+  showFrame: false,
 }
 
 function useTextConfig() {

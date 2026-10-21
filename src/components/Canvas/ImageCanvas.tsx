@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react"
 import type { FilterConfig, TextConfig, WatermarkConfig } from "../../types"
 import { applyFilter } from "../../utils/filters"
-import { renderTextOnCanvas } from "../../utils/renderText"
+import { getCanvasFont, renderTextOnCanvas } from "../../utils/renderText"
 import { renderWatermarkOnCanvas } from "../../utils/renderWatermark"
 
 interface ImageCanvasProps {
@@ -10,11 +10,12 @@ interface ImageCanvasProps {
   watermarkConfig: WatermarkConfig
   filterConfig: FilterConfig
   zoom: number
+  onLayoutWarning?: (warning: string | null) => void
 }
 
 const CONTAINER_PADDING = 40
 
-function ImageCanvas({ image, textConfig, watermarkConfig, filterConfig, zoom }: ImageCanvasProps) {
+function ImageCanvas({ image, textConfig, watermarkConfig, filterConfig, zoom, onLayoutWarning }: ImageCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const [containerSize, setContainerSize] = useState({ width: 0, height: 0 })
@@ -41,25 +42,25 @@ function ImageCanvas({ image, textConfig, watermarkConfig, filterConfig, zoom }:
     const canvas = canvasRef.current
     if (!canvas) return
 
-    const ctx = canvas.getContext("2d")
-    if (!ctx) return
-
     const loadedImage = image
     let cancelled = false
 
     const renderCanvas = async () => {
-      canvas.width = loadedImage.naturalWidth
-      canvas.height = loadedImage.naturalHeight
+      const renderCanvas = document.createElement("canvas")
+      renderCanvas.width = loadedImage.naturalWidth
+      renderCanvas.height = loadedImage.naturalHeight
+      const renderCtx = renderCanvas.getContext("2d")
+      if (!renderCtx) return
 
-      const scaledFontSize = (textConfig.fontSize / 600) * canvas.width
-      await document.fonts.load(`${scaledFontSize}px "${textConfig.fontFamily}"`)
+      const scaledFontSize = (textConfig.fontSize / 600) * renderCanvas.width
+      await document.fonts.load(getCanvasFont(textConfig.fontFamily, scaledFontSize))
+      await document.fonts.load(getCanvasFont("Cinzel", scaledFontSize * 0.5))
       await document.fonts.ready
 
       if (cancelled) return
 
       // Step 1: draw the base image
-      ctx.clearRect(0, 0, canvas.width, canvas.height)
-      ctx.drawImage(loadedImage, 0, 0, canvas.width, canvas.height)
+      renderCtx.drawImage(loadedImage, 0, 0, renderCanvas.width, renderCanvas.height)
 
       // Step 2: apply the selected filter to the drawn pixels.
       // applyFilter walks every pixel, so this can get slow on very large
@@ -67,19 +68,27 @@ function ImageCanvas({ image, textConfig, watermarkConfig, filterConfig, zoom }:
       // work to an OffscreenCanvas inside a Web Worker.
       if (filterConfig.active !== "none") {
         if (cancelled) return
-        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+        const imageData = renderCtx.getImageData(0, 0, renderCanvas.width, renderCanvas.height)
         const filteredData = applyFilter(imageData, filterConfig.active, filterConfig.intensity)
-        ctx.putImageData(filteredData, 0, 0)
+        renderCtx.putImageData(filteredData, 0, 0)
       }
 
       if (cancelled) return
 
       // Steps 3 & 4: overlay + text (renderTextOnCanvas draws the overlay
       // first, then the text, on top of the filtered image)
-      renderTextOnCanvas(ctx, canvas.width, canvas.height, textConfig)
+      const result = renderTextOnCanvas(renderCtx, renderCanvas.width, renderCanvas.height, textConfig, watermarkConfig)
 
       // Step 5: watermark
-      renderWatermarkOnCanvas(ctx, canvas.width, canvas.height, watermarkConfig)
+      renderWatermarkOnCanvas(renderCtx, renderCanvas.width, renderCanvas.height, watermarkConfig)
+
+      if (cancelled) return
+      canvas.width = renderCanvas.width
+      canvas.height = renderCanvas.height
+      const visibleCtx = canvas.getContext("2d")
+      if (!visibleCtx) return
+      visibleCtx.drawImage(renderCanvas, 0, 0)
+      onLayoutWarning?.(result.warning)
     }
 
     renderCanvas()
@@ -87,7 +96,7 @@ function ImageCanvas({ image, textConfig, watermarkConfig, filterConfig, zoom }:
     return () => {
       cancelled = true
     }
-  }, [image, textConfig, watermarkConfig, filterConfig])
+  }, [image, textConfig, watermarkConfig, filterConfig, onLayoutWarning])
 
   if (!image) {
     return <div ref={containerRef} className="flex h-full w-full items-center justify-center overflow-auto" />

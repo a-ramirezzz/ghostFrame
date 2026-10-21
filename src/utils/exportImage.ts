@@ -1,7 +1,7 @@
 import type { ExportResolution, FilterConfig, TextConfig, WatermarkConfig } from '../types'
 import { RESOLUTION_PRESETS } from '../types'
 import { applyFilter } from './filters'
-import { renderTextOnCanvas } from './renderText'
+import { getCanvasFont, renderTextOnCanvas } from './renderText'
 import { renderWatermarkOnCanvas } from './renderWatermark'
 import { applyNoiseGrain } from './noiseGenerator'
 
@@ -51,10 +51,12 @@ export async function exportImage(params: ExportParams): Promise<Blob> {
   }
 
   // Step 4: Render text overlay.
-  if (textConfig.content.trim()) {
+  if (textConfig.content.trim() || textConfig.author.trim() || textConfig.pageName.trim() || textConfig.showFrame) {
     const scaledFontSize = (textConfig.fontSize / 600) * targetWidth
-    await document.fonts.load(`${scaledFontSize}px "${textConfig.fontFamily}"`)
-    renderTextOnCanvas(ctx, targetWidth, targetHeight, textConfig)
+    await document.fonts.load(getCanvasFont(textConfig.fontFamily, scaledFontSize))
+    await document.fonts.load(getCanvasFont('Cinzel', scaledFontSize * 0.5))
+    await document.fonts.ready
+    renderTextOnCanvas(ctx, targetWidth, targetHeight, textConfig, watermarkConfig)
   }
 
   // Step 5: Render watermark.

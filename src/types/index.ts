@@ -14,6 +14,8 @@ export interface TextConfig {
   alignment: 'left' | 'center' | 'right'
   showOverlay: boolean
   overlayOpacity: number
+  accentColor: string
+  showFrame: boolean
 }
 
 export interface WatermarkConfig {

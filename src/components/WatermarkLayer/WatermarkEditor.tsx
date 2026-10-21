@@ -57,7 +57,7 @@ function WatermarkEditor({
             <img
               src={watermarkConfig.image.src}
               alt="Watermark preview"
-              className="mx-auto max-h-12 object-contain"
+              className="mx-auto aspect-square h-12 w-12 rounded-full object-cover object-center"
             />
           </div>
 

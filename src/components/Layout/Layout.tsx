@@ -12,6 +12,7 @@ import useWatermarkConfig from "../../hooks/useWatermarkConfig"
 import useZoom from "../../hooks/useZoom"
 import ImageControls from "./ImageControls"
 import SidebarSection from "./SidebarSection"
+import { useState } from "react"
 
 function Layout() {
   const { originalImage, fileName, loadImage } = useImageLoader()
@@ -21,6 +22,7 @@ function Layout() {
   const { filterConfig, setFilter, setIntensity } = useFilterConfig()
   const { exportConfig, isExporting, updateExportConfig, performExport } = useExport()
   const { zoom, zoomIn, zoomOut, resetZoom } = useZoom()
+  const [layoutWarning, setLayoutWarning] = useState<string | null>(null)
 
   const handleWheel = (event: React.WheelEvent) => {
     if (event.ctrlKey || event.metaKey) {
@@ -48,11 +50,13 @@ function Layout() {
       >
         <div className="mb-4 pb-4">
           <h1 className="flex items-center gap-3 text-base font-semibold tracking-wide">
-            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="shrink-0" style={{ filter: 'drop-shadow(0 0 6px rgba(200, 164, 78, 0.3))' }}>
-              <path d="M12 2C7.58 2 4 5.58 4 10v10.5c0 .83 1.01 1.24 1.59.65l1.41-1.4 1.41 1.4c.39.39 1.02.39 1.41 0L12 19.74l2.18 2.41c.39.39 1.02.39 1.41 0l1.41-1.4 1.41 1.4c.58.59 1.59.18 1.59-.65V10c0-4.42-3.58-8-8-8z" fill="#c8a44e"/>
-              <circle cx="9.5" cy="11" r="1.5" fill="#0c0b09"/>
-              <circle cx="14.5" cy="11" r="1.5" fill="#0c0b09"/>
-            </svg>
+            <div className="w-9 h-9 rounded-full bg-[#1a1814] border border-[#2a2721] flex items-center justify-center shrink-0">
+              <svg width="30" height="30" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="shrink-0" style={{ filter: 'drop-shadow(0 0 6px rgba(200, 164, 78, 0.3))' }}>
+                <path d="M12 2C7.58 2 4 5.58 4 10v10.5c0 .83 1.01 1.24 1.59.65l1.41-1.4 1.41 1.4c.39.39 1.02.39 1.41 0L12 19.74l2.18 2.41c.39.39 1.02.39 1.41 0l1.41-1.4 1.41 1.4c.58.59 1.59.18 1.59-.65V10c0-4.42-3.58-8-8-8z" fill="#c8a44e"/>
+                <circle cx="9.5" cy="11" r="1.5" fill="#0c0b09"/>
+                <circle cx="14.5" cy="11" r="1.5" fill="#0c0b09"/>
+              </svg>
+            </div>
             <span className="text-[#e8e2d6]">Ghost</span>
             <span className="text-[#c8a44e]">Frame</span>
           </h1>
@@ -75,7 +79,11 @@ function Layout() {
           </SidebarSection>
 
           <SidebarSection title="Text">
-            <TextEditor textConfig={textConfig} updateTextConfig={updateTextConfig} />
+            <TextEditor
+              textConfig={textConfig}
+              updateTextConfig={updateTextConfig}
+              layoutWarning={layoutWarning}
+            />
           </SidebarSection>
 
           <SidebarSection title="Filters">
@@ -119,6 +127,7 @@ function Layout() {
             watermarkConfig={watermarkConfig}
             filterConfig={filterConfig}
             zoom={zoom}
+            onLayoutWarning={setLayoutWarning}
           />
         ) : (
           <DropZone onImageLoad={loadImage} />

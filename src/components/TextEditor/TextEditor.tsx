@@ -4,6 +4,7 @@ import { AVAILABLE_FONTS, type TextConfig } from "../../types"
 interface TextEditorProps {
   textConfig: TextConfig
   updateTextConfig: (partial: Partial<TextConfig>) => void
+  layoutWarning?: string | null
 }
 
 const POSITIONS: { value: TextConfig["position"]; label: string }[] = [
@@ -18,7 +19,7 @@ const ALIGNMENTS: { value: TextConfig["alignment"]; label: string }[] = [
   { value: "right", label: "Right" },
 ]
 
-function TextEditor({ textConfig, updateTextConfig }: TextEditorProps) {
+function TextEditor({ textConfig, updateTextConfig, layoutWarning }: TextEditorProps) {
   const handleContentChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
     updateTextConfig({ content: event.target.value })
   }
@@ -50,8 +51,9 @@ function TextEditor({ textConfig, updateTextConfig }: TextEditorProps) {
   return (
     <div className="flex flex-col gap-3">
       <div>
-        <span className="mb-1 block text-xs text-[#9a9484]">Quote</span>
+        <label htmlFor="quote-content" className="mb-1 block text-xs text-[#9a9484]">Quote</label>
         <textarea
+          id="quote-content"
           value={textConfig.content}
           onChange={handleContentChange}
           placeholder="Write your stoic quote..."
@@ -60,9 +62,43 @@ function TextEditor({ textConfig, updateTextConfig }: TextEditorProps) {
         />
       </div>
 
+      <fieldset className="rounded-md border border-[#2a2721] bg-[#15130f] p-3">
+        <legend className="px-1 text-[11px] font-medium uppercase tracking-[0.16em] text-[#c8a44e]">
+          Composition
+        </legend>
+          <div className="flex flex-col gap-3">
+            <label className="flex items-center justify-between text-xs text-[#9a9484]">
+              Accent color
+              <input
+                type="color"
+                value={textConfig.accentColor}
+                onChange={(event) => updateTextConfig({ accentColor: event.target.value })}
+                className="h-8 w-8 cursor-pointer rounded border-0 bg-transparent focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#c8a44e]"
+                aria-label="Editorial accent color"
+              />
+            </label>
+            <label className="flex cursor-pointer items-center justify-between text-xs text-[#9a9484]">
+              Decorative frame
+              <input
+                type="checkbox"
+                checked={textConfig.showFrame}
+                onChange={(event) => updateTextConfig({ showFrame: event.target.checked })}
+                className="h-4 w-4 accent-[#c8a44e] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#c8a44e]"
+              />
+            </label>
+          </div>
+      </fieldset>
+
+      {layoutWarning && (
+        <p role="status" className="rounded-md border border-[#8d6d32] bg-[#2a2113] px-3 py-2 text-xs leading-relaxed text-[#e4c980]">
+          {layoutWarning}
+        </p>
+      )}
+
       <div>
-        <span className="mb-1 block text-xs text-[#9a9484]">Attribution</span>
+        <label htmlFor="quote-author" className="mb-1 block text-xs text-[#9a9484]">Attribution</label>
         <input
+          id="quote-author"
           type="text"
           value={textConfig.author}
           onChange={handleAuthorChange}
@@ -72,8 +108,9 @@ function TextEditor({ textConfig, updateTextConfig }: TextEditorProps) {
       </div>
 
       <div>
-        <span className="mb-1 block text-xs text-[#9a9484]">Page name</span>
+        <label htmlFor="page-name" className="mb-1 block text-xs text-[#9a9484]">Page name</label>
         <input
+          id="page-name"
           type="text"
           value={textConfig.pageName}
           onChange={handlePageNameChange}
@@ -83,7 +120,9 @@ function TextEditor({ textConfig, updateTextConfig }: TextEditorProps) {
         <span className="mt-1 block text-xs text-[#5a5449]">Displayed as @PAGENAME on the image</span>
       </div>
 
+      <label htmlFor="quote-font" className="sr-only">Quote font</label>
       <select
+        id="quote-font"
         value={textConfig.fontFamily}
         onChange={handleFontChange}
         className="select-ghost w-full rounded-md border border-[#2a2721] bg-[#1a1814] p-2 text-sm text-[#e8e2d6] transition-all duration-200 focus:border-[#c8a44e] focus:outline-none focus:[box-shadow:0_0_0_2px_rgba(200,164,78,0.1)]"
@@ -128,6 +167,8 @@ function TextEditor({ textConfig, updateTextConfig }: TextEditorProps) {
             <button
               key={position.value}
               type="button"
+              aria-label={`${position.value} position`}
+              aria-pressed={textConfig.position === position.value}
               onClick={() => updateTextConfig({ position: position.value })}
               className={`rounded-md border px-3 py-1.5 text-xs transition-all duration-200 ${
                 textConfig.position === position.value
@@ -148,6 +189,8 @@ function TextEditor({ textConfig, updateTextConfig }: TextEditorProps) {
             <button
               key={alignment.value}
               type="button"
+              aria-label={`${alignment.label} alignment`}
+              aria-pressed={textConfig.alignment === alignment.value}
               onClick={() => updateTextConfig({ alignment: alignment.value })}
               className={`rounded-md border px-3 py-1.5 text-xs transition-all duration-200 ${
                 textConfig.alignment === alignment.value
@@ -163,11 +206,13 @@ function TextEditor({ textConfig, updateTextConfig }: TextEditorProps) {
 
       <div className="flex items-center justify-between">
         <span className="text-xs text-[#9a9484]">Dark overlay</span>
-        <div
+        <button
+          type="button"
           role="switch"
+          aria-label="Dark overlay"
           aria-checked={textConfig.showOverlay}
           onClick={() => updateTextConfig({ showOverlay: !textConfig.showOverlay })}
-          className={`relative h-5 w-10 cursor-pointer rounded-full transition-all duration-200 ${
+          className={`relative h-5 w-10 cursor-pointer rounded-full transition-all duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#c8a44e] ${
             textConfig.showOverlay ? "bg-[#c8a44e]" : "bg-[#2a2721]"
           }`}
         >
@@ -176,7 +221,7 @@ function TextEditor({ textConfig, updateTextConfig }: TextEditorProps) {
               textConfig.showOverlay ? "left-5 bg-[#12110e]" : "left-0.5 bg-[#6b6559]"
             }`}
           />
-        </div>
+        </button>
       </div>
 
       {textConfig.showOverlay && (
