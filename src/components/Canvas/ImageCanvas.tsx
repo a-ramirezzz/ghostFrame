@@ -1,8 +1,7 @@
 import { useEffect, useRef, useState } from "react"
 import type { FilterConfig, TextConfig, WatermarkConfig } from "../../types"
 import { applyFilter } from "../../utils/filters"
-import { getCanvasFont, renderTextOnCanvas } from "../../utils/renderText"
-import { renderWatermarkOnCanvas } from "../../utils/renderWatermark"
+import { drawBaseImage, drawComposition, drawWatermark, layoutComposition, prepareCompositionFonts } from "../../utils/composition"
 
 interface ImageCanvasProps {
   image: HTMLImageElement | null
@@ -59,15 +58,14 @@ function ImageCanvas({ image, textConfig, watermarkConfig, filterConfig, zoom, o
       const renderCtx = renderCanvas.getContext("2d")
       if (!renderCtx) throw new Error("Canvas is unavailable")
 
-      const scaledFontSize = (textConfig.fontSize / 600) * renderCanvas.width
-      await document.fonts.load(getCanvasFont(textConfig.fontFamily, scaledFontSize))
-      await document.fonts.load(getCanvasFont("Cinzel", scaledFontSize * 0.5))
-      await document.fonts.ready
+      await prepareCompositionFonts(textConfig)
 
       if (cancelled) return
 
+      const layout = layoutComposition(renderCtx, loadedImage.naturalWidth, loadedImage.naturalHeight, textConfig, watermarkConfig)
+
       // Step 1: draw the base image
-      renderCtx.drawImage(loadedImage, 0, 0, renderCanvas.width, renderCanvas.height)
+      drawBaseImage(renderCtx, renderCanvas.width, renderCanvas.height, layout, loadedImage)
 
       // Step 2: apply the selected filter to the drawn pixels.
       // applyFilter walks every pixel, so this can get slow on very large
@@ -82,12 +80,9 @@ function ImageCanvas({ image, textConfig, watermarkConfig, filterConfig, zoom, o
 
       if (cancelled) return
 
-      // Steps 3 & 4: overlay + text (renderTextOnCanvas draws the overlay
-      // first, then the text, on top of the filtered image)
-      const result = renderTextOnCanvas(renderCtx, renderCanvas.width, renderCanvas.height, textConfig, watermarkConfig)
-
-      // Step 5: watermark
-      renderWatermarkOnCanvas(renderCtx, renderCanvas.width, renderCanvas.height, watermarkConfig)
+      // Steps 3-5: draw the measured composition, then watermark.
+      drawComposition(renderCtx, renderCanvas.width, renderCanvas.height, layout, textConfig)
+      drawWatermark(renderCtx, renderCanvas.width, renderCanvas.height, layout, watermarkConfig)
 
       if (cancelled) return
       canvas.width = renderCanvas.width
@@ -100,7 +95,7 @@ function ImageCanvas({ image, textConfig, watermarkConfig, filterConfig, zoom, o
       setRenderError(null)
       setIsShowingPreviousImage(false)
       onRenderError?.(null)
-      onLayoutWarning?.(result.warning)
+      onLayoutWarning?.(layout.warning)
     }
 
     void renderCanvas().catch(() => {

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react"
 import type { ExportConfig } from "../types"
-import { exportImage, type ExportParams } from "../utils/exportImage"
+import { CompositionFitError, exportImage, type ExportParams } from "../utils/exportImage"
 import { downloadBlob } from "../utils/downloadFile"
 
 const DEFAULT_EXPORT_CONFIG: ExportConfig = {
@@ -61,9 +61,11 @@ function useExport(isEligible: boolean) {
         const extension = format === "image/jpeg" ? "jpg" : "png"
         const fileName = `ghostframe_${resolution}_${Date.now()}.${extension}`
         downloadBlob(blob, fileName)
-      } catch {
+      } catch (caught) {
         if (mountedRef.current && operationId === operationIdRef.current) {
-          setError("The image could not be exported. Try again or choose another format.")
+          setError(caught instanceof CompositionFitError
+            ? caught.message
+            : "The image could not be exported. Try again or choose another format.")
         }
       } finally {
         if (lockOwnerRef.current === operationId) {

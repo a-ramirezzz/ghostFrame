@@ -1,8 +1,7 @@
 import type { ExportResolution, FilterConfig, TextConfig, WatermarkConfig } from '../types'
 import { RESOLUTION_PRESETS } from '../types'
 import { applyFilter } from './filters'
-import { getCanvasFont, renderTextOnCanvas } from './renderText'
-import { renderWatermarkOnCanvas } from './renderWatermark'
+import { COMPOSITION_FIT_ERROR, drawBaseImage, drawComposition, drawWatermark, layoutComposition, prepareCompositionFonts } from './composition'
 import { applyNoiseGrain } from './noiseGenerator'
 
 export interface ExportParams {
@@ -13,6 +12,13 @@ export interface ExportParams {
   resolution: ExportResolution
   format: 'image/jpeg' | 'image/png'
   quality: number
+}
+
+export class CompositionFitError extends Error {
+  constructor() {
+    super(COMPOSITION_FIT_ERROR)
+    this.name = 'CompositionFitError'
+  }
 }
 
 export async function exportImage(params: ExportParams): Promise<Blob> {
@@ -49,8 +55,12 @@ export async function exportImage(params: ExportParams): Promise<Blob> {
   const ctx = canvas.getContext('2d')
   if (!ctx) throw new Error('Canvas is unavailable')
 
+  await prepareCompositionFonts(textConfig)
+  const layout = layoutComposition(ctx, sourceWidth, sourceHeight, textConfig, watermarkConfig)
+  if (!layout.fits) throw new CompositionFitError()
+
   // Step 2: Draw the original image scaled to target resolution.
-  ctx.drawImage(originalImage, 0, 0, targetWidth, targetHeight)
+  drawBaseImage(ctx, targetWidth, targetHeight, layout, originalImage)
 
   // Step 3: Apply filter (if any).
   if (filterConfig.active !== 'none') {
@@ -59,17 +69,11 @@ export async function exportImage(params: ExportParams): Promise<Blob> {
     ctx.putImageData(filtered, 0, 0)
   }
 
-  // Step 4: Render text overlay.
-  if (textConfig.content.trim() || textConfig.author.trim() || textConfig.pageName.trim() || textConfig.showFrame) {
-    const scaledFontSize = (textConfig.fontSize / 600) * targetWidth
-    await document.fonts.load(getCanvasFont(textConfig.fontFamily, scaledFontSize))
-    await document.fonts.load(getCanvasFont('Cinzel', scaledFontSize * 0.5))
-    await document.fonts.ready
-    renderTextOnCanvas(ctx, targetWidth, targetHeight, textConfig, watermarkConfig)
-  }
+  // Step 4: Draw the already measured logical composition.
+  drawComposition(ctx, targetWidth, targetHeight, layout, textConfig)
 
   // Step 5: Render watermark.
-  renderWatermarkOnCanvas(ctx, targetWidth, targetHeight, watermarkConfig)
+  drawWatermark(ctx, targetWidth, targetHeight, layout, watermarkConfig)
 
   // Step 6: Apply noise grain (anti-fingerprint).
   applyNoiseGrain(ctx, targetWidth, targetHeight)
