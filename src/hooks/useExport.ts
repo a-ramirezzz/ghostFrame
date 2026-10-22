@@ -2,15 +2,10 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react
 import type { ExportConfig } from "../types"
 import { CompositionFitError, exportImage, type ExportParams } from "../utils/exportImage"
 import { downloadBlob } from "../utils/downloadFile"
+import { DEFAULT_EXPORT_CONFIG } from "../state/editorDefaults"
 
-const DEFAULT_EXPORT_CONFIG: ExportConfig = {
-  resolution: "low",
-  format: "image/jpeg",
-  quality: 0.92,
-}
-
-function useExport(isEligible: boolean) {
-  const [exportConfig, setExportConfig] = useState<ExportConfig>(DEFAULT_EXPORT_CONFIG)
+function useExport(isEligible: boolean, initial = DEFAULT_EXPORT_CONFIG) {
+  const [exportConfig, setExportConfig] = useState<ExportConfig>(initial)
   const [isExporting, setIsExporting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const exportLockRef = useRef(false)
@@ -78,7 +73,8 @@ function useExport(isEligible: boolean) {
     [exportConfig],
   )
 
-  return { exportConfig, isExporting, error, dismissError: () => setError(null), updateExportConfig, performExport }
+  const resetExportConfig = useCallback(() => setExportConfig({ ...DEFAULT_EXPORT_CONFIG }), [])
+  return { exportConfig, isExporting, error, dismissError: () => setError(null), updateExportConfig, resetExportConfig, performExport }
 }
 
 export default useExport

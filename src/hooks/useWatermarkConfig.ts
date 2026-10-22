@@ -1,17 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from "react"
 import type { WatermarkConfig } from "../types"
+import { DEFAULT_WATERMARK_CONFIG } from "../state/editorDefaults"
 import { IMAGE_DECODE_ERROR, WATERMARK_TYPES, validateImageDimensions, validateImageFile } from "../utils/imageLoading"
 
-const DEFAULT_WATERMARK_CONFIG: WatermarkConfig = {
-  image: null,
-  opacity: 0.2,
-  size: 15,
-  position: "bottom-right",
-}
-
-function useWatermarkConfig() {
+function useWatermarkConfig(initial = DEFAULT_WATERMARK_CONFIG) {
   const [watermarkConfig, setWatermarkConfig] = useState<WatermarkConfig>(
-    DEFAULT_WATERMARK_CONFIG,
+    { ...initial, image: null },
   )
   const currentUrlRef = useRef<string | null>(null)
   const pendingUrlRef = useRef<string | null>(null)
@@ -111,7 +105,11 @@ function useWatermarkConfig() {
     setWatermarkConfig((prev) => ({ ...prev, ...partial }))
   }, [])
 
-  return { watermarkConfig, loadWatermark, removeWatermark, updateWatermarkConfig, isLoading, error, dismissError: () => setError(null) }
+  const resetWatermarkConfig = useCallback(() => {
+    setWatermarkConfig((prev) => ({ ...DEFAULT_WATERMARK_CONFIG, image: prev.image }))
+  }, [])
+
+  return { watermarkConfig, loadWatermark, removeWatermark, updateWatermarkConfig, resetWatermarkConfig, isLoading, error, dismissError: () => setError(null) }
 }
 
 export default useWatermarkConfig

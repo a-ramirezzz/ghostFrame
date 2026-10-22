@@ -1,34 +1,16 @@
 import { useCallback, useState } from "react"
 import type { TextConfig } from "../types"
+import { DEFAULT_TEXT_CONFIG } from "../state/editorDefaults"
 
-const savedPageName = localStorage.getItem('ghostframe_pageName') || ''
-
-const DEFAULT_TEXT_CONFIG: TextConfig = {
-  content: "",
-  author: "",
-  pageName: savedPageName,
-  fontFamily: "Playfair Display",
-  fontSize: 32,
-  color: "#F2EBDD",
-  position: "center",
-  alignment: "center",
-  showOverlay: true,
-  overlayOpacity: 0.5,
-  accentColor: "#C8A44E",
-  showFrame: false,
-}
-
-function useTextConfig() {
-  const [textConfig, setTextConfig] = useState<TextConfig>(DEFAULT_TEXT_CONFIG)
+function useTextConfig(initial = DEFAULT_TEXT_CONFIG) {
+  const [textConfig, setTextConfig] = useState<TextConfig>(initial)
 
   const updateTextConfig = useCallback((partial: Partial<TextConfig>) => {
-    if ('pageName' in partial && partial.pageName !== undefined) {
-      localStorage.setItem('ghostframe_pageName', partial.pageName)
-    }
     setTextConfig((prev) => ({ ...prev, ...partial }))
   }, [])
 
-  return { textConfig, updateTextConfig }
+  const resetTextConfig = useCallback(() => setTextConfig({ ...DEFAULT_TEXT_CONFIG }), [])
+  return { textConfig, updateTextConfig, resetTextConfig }
 }
 
 export default useTextConfig

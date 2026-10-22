@@ -10,21 +10,25 @@ import useImageLoader from "../../hooks/useImageLoader"
 import useTextConfig from "../../hooks/useTextConfig"
 import useWatermarkConfig from "../../hooks/useWatermarkConfig"
 import useZoom from "../../hooks/useZoom"
+import useEditorPersistence from "../../hooks/useEditorPersistence"
+import { loadEditorSnapshot } from "../../state/editorPersistence"
 import ImageControls from "./ImageControls"
 import SidebarSection from "./SidebarSection"
 import { useCallback, useState } from "react"
 
 function Layout() {
+  const [initialEditor] = useState(loadEditorSnapshot)
   const { originalImage, fileName, loadImage, isLoading: isImageLoading, error: imageError, dismissError: dismissImageError } = useImageLoader()
-  const { textConfig, updateTextConfig } = useTextConfig()
-  const { watermarkConfig, loadWatermark, removeWatermark, updateWatermarkConfig, isLoading: isWatermarkLoading, error: watermarkError, dismissError: dismissWatermarkError } =
-    useWatermarkConfig()
-  const { filterConfig, setFilter, setIntensity } = useFilterConfig()
+  const { textConfig, updateTextConfig, resetTextConfig } = useTextConfig(initialEditor.snapshot.text)
+  const { watermarkConfig, loadWatermark, removeWatermark, updateWatermarkConfig, resetWatermarkConfig, isLoading: isWatermarkLoading, error: watermarkError, dismissError: dismissWatermarkError } =
+    useWatermarkConfig(initialEditor.snapshot.watermark)
+  const { filterConfig, setFilter, setIntensity, resetFilterConfig } = useFilterConfig(initialEditor.snapshot.filter)
   const { zoom, zoomIn, zoomOut, resetZoom } = useZoom()
   const [layoutWarning, setLayoutWarning] = useState<string | null>(null)
   const [previewError, setPreviewError] = useState<string | null>(null)
   const isExportEligible = originalImage !== null && !isImageLoading && !isWatermarkLoading && previewError === null
-  const { exportConfig, isExporting, error: exportError, dismissError: dismissExportError, updateExportConfig, performExport } = useExport(isExportEligible)
+  const { exportConfig, isExporting, error: exportError, dismissError: dismissExportError, updateExportConfig, resetExportConfig, performExport } = useExport(isExportEligible, initialEditor.snapshot.export)
+  const persistence = useEditorPersistence(initialEditor, { textConfig, filterConfig, watermarkConfig, exportConfig })
   const handleRenderError = useCallback((error: string | null) => setPreviewError(error), [])
 
   const handleWheel = (event: React.WheelEvent) => {
@@ -38,6 +42,16 @@ function Layout() {
   const handleExport = () => {
     if (!isExportEligible || !originalImage) return
     performExport({ originalImage, filterConfig, textConfig, watermarkConfig })
+  }
+
+  const handleReset = () => {
+    if (isExporting || !window.confirm("Reset saved text and editor settings? Your selected image and logo will stay open.")) return
+    if (!persistence.clearSavedEditor()) return
+    resetTextConfig()
+    resetFilterConfig()
+    resetWatermarkConfig()
+    resetExportConfig()
+    setLayoutWarning(null)
   }
 
   return (
@@ -125,6 +139,23 @@ function Layout() {
               onDismissError={dismissExportError}
             />
           </SidebarSection>
+
+          <div className="rounded-md border border-[#2a2721] bg-[#15130f] p-3 text-xs leading-relaxed text-[#9a9484]">
+            <p role="status">
+              {persistence.status === "saving" && "Saving…"}
+              {persistence.status === "restored" && (originalImage || watermarkConfig.image ? "Text and settings restored." : "Text and settings restored. Select your image and logo again.")}
+              {persistence.status === "saved" && "Text and settings saved locally."}
+              {persistence.status === "unavailable" && "Autosave unavailable. Your current work is still open."}
+              {persistence.status === "unsupported" && "This browser has a draft from a newer GhostFrame version. It was left unchanged."}
+              {persistence.status === "reset" && "Editor reset. Saved text and settings were removed."}
+              {persistence.status === "reset-error" && "Reset failed. Saved data was not fully removed; your current work is still open."}
+              {persistence.status === "idle" && "Text and settings stay local to this browser and site."}
+            </p>
+            <div className="mt-2 flex gap-3">
+              {persistence.status === "unavailable" && <button type="button" onClick={persistence.retry} className="text-[#c8a44e]">Retry save</button>}
+              <button type="button" onClick={handleReset} disabled={isExporting} className="text-[#c8a44e] disabled:cursor-not-allowed disabled:opacity-40">Reset editor</button>
+            </div>
+          </div>
         </div>
       </aside>
 

@@ -1,13 +1,9 @@
 import { useCallback, useState } from "react"
 import type { FilterConfig, FilterName } from "../types"
+import { DEFAULT_FILTER_CONFIG } from "../state/editorDefaults"
 
-const DEFAULT_FILTER_CONFIG: FilterConfig = {
-  active: "none",
-  intensity: 1.0,
-}
-
-function useFilterConfig() {
-  const [filterConfig, setFilterConfig] = useState<FilterConfig>(DEFAULT_FILTER_CONFIG)
+function useFilterConfig(initial = DEFAULT_FILTER_CONFIG) {
+  const [filterConfig, setFilterConfig] = useState<FilterConfig>(initial)
 
   const setFilter = useCallback((name: FilterName) => {
     setFilterConfig((prev) => ({ ...prev, active: name }))
@@ -17,7 +13,8 @@ function useFilterConfig() {
     setFilterConfig((prev) => ({ ...prev, intensity: value }))
   }, [])
 
-  return { filterConfig, setFilter, setIntensity }
+  const resetFilterConfig = useCallback(() => setFilterConfig({ ...DEFAULT_FILTER_CONFIG }), [])
+  return { filterConfig, setFilter, setIntensity, resetFilterConfig }
 }
 
 export default useFilterConfig
