@@ -8,6 +8,9 @@ interface ExportPanelProps {
   onUpdateConfig: (partial: Partial<ExportConfig>) => void
   onExport: () => void
   hasImage: boolean
+  isBlocked: boolean
+  error: string | null
+  onDismissError: () => void
 }
 
 const RESOLUTIONS: ExportResolution[] = ["low", "medium", "high"]
@@ -18,12 +21,15 @@ function ExportPanel({
   onUpdateConfig,
   onExport,
   hasImage,
+  isBlocked,
+  error,
+  onDismissError,
 }: ExportPanelProps) {
   const handleQualityChange = (event: ChangeEvent<HTMLInputElement>) => {
     onUpdateConfig({ quality: Number(event.target.value) })
   }
 
-  const isDisabled = !hasImage || isExporting
+  const isDisabled = !hasImage || isExporting || isBlocked
 
   return (
     <div className="flex flex-col gap-4">
@@ -114,6 +120,13 @@ function ExportPanel({
       >
         {isExporting ? <span className="animate-pulse">Exporting...</span> : "Export Image ↓"}
       </button>
+
+      {error && (
+        <div role="alert" className="flex items-start gap-2 text-xs text-[#e3a39a]">
+          <span>{error}</span>
+          <button type="button" onClick={onDismissError} aria-label="Dismiss export error" className="text-[#c8a44e]">×</button>
+        </div>
+      )}
 
       <p className="flex items-center gap-1 text-xs text-[#5a5449]">
         <span>🔒</span>

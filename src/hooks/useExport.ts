@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react"
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react"
 import type { ExportConfig } from "../types"
 import { exportImage, type ExportParams } from "../utils/exportImage"
 import { downloadBlob } from "../utils/downloadFile"
@@ -9,9 +9,29 @@ const DEFAULT_EXPORT_CONFIG: ExportConfig = {
   quality: 0.92,
 }
 
-function useExport() {
+function useExport(isEligible: boolean) {
   const [exportConfig, setExportConfig] = useState<ExportConfig>(DEFAULT_EXPORT_CONFIG)
   const [isExporting, setIsExporting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const exportLockRef = useRef(false)
+  const lockOwnerRef = useRef<number | null>(null)
+  const operationIdRef = useRef(0)
+  const mountedRef = useRef(true)
+  const eligibilityRef = useRef(isEligible)
+
+  useLayoutEffect(() => {
+    eligibilityRef.current = isEligible
+  }, [isEligible])
+
+  useEffect(() => {
+    mountedRef.current = true
+    return () => {
+      mountedRef.current = false
+      operationIdRef.current += 1
+      exportLockRef.current = false
+      lockOwnerRef.current = null
+    }
+  }, [])
 
   const updateExportConfig = useCallback((partial: Partial<ExportConfig>) => {
     setExportConfig((prev) => ({ ...prev, ...partial }))
@@ -19,23 +39,44 @@ function useExport() {
 
   const performExport = useCallback(
     async (params: Omit<ExportParams, "resolution" | "format" | "quality">) => {
+      if (!mountedRef.current || !eligibilityRef.current || exportLockRef.current) return
+      const operationId = ++operationIdRef.current
+      exportLockRef.current = true
+      lockOwnerRef.current = operationId
       setIsExporting(true)
+      setError(null)
       try {
         const { resolution, format, quality } = exportConfig
-        const blob = await exportImage({ ...params, resolution, format, quality })
+        const snapshot: ExportParams = {
+          originalImage: params.originalImage,
+          filterConfig: { ...params.filterConfig },
+          textConfig: { ...params.textConfig },
+          watermarkConfig: { ...params.watermarkConfig },
+          resolution,
+          format,
+          quality,
+        }
+        const blob = await exportImage(snapshot)
+        if (!mountedRef.current || operationId !== operationIdRef.current) return
         const extension = format === "image/jpeg" ? "jpg" : "png"
         const fileName = `ghostframe_${resolution}_${Date.now()}.${extension}`
         downloadBlob(blob, fileName)
-      } catch (error) {
-        console.error(error)
+      } catch {
+        if (mountedRef.current && operationId === operationIdRef.current) {
+          setError("The image could not be exported. Try again or choose another format.")
+        }
       } finally {
-        setIsExporting(false)
+        if (lockOwnerRef.current === operationId) {
+          exportLockRef.current = false
+          lockOwnerRef.current = null
+          if (mountedRef.current && operationId === operationIdRef.current) setIsExporting(false)
+        }
       }
     },
     [exportConfig],
   )
 
-  return { exportConfig, isExporting, updateExportConfig, performExport }
+  return { exportConfig, isExporting, error, dismissError: () => setError(null), updateExportConfig, performExport }
 }
 
 export default useExport

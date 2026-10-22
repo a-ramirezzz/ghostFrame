@@ -6,6 +6,9 @@ interface WatermarkEditorProps {
   loadWatermark: (file: File) => void
   removeWatermark: () => void
   updateWatermarkConfig: (partial: Partial<WatermarkConfig>) => void
+  isLoading: boolean
+  error: string | null
+  onDismissError: () => void
 }
 
 const POSITIONS: { value: WatermarkConfig["position"]; area: string }[] = [
@@ -21,6 +24,9 @@ function WatermarkEditor({
   loadWatermark,
   removeWatermark,
   updateWatermarkConfig,
+  isLoading,
+  error,
+  onDismissError,
 }: WatermarkEditorProps) {
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -61,13 +67,10 @@ function WatermarkEditor({
             />
           </div>
 
-          <button
-            type="button"
-            onClick={removeWatermark}
-            className="cursor-pointer self-start text-xs text-[#c45b4f] transition hover:text-[#d4695d]"
-          >
-            Remove
-          </button>
+          <div className="flex gap-3">
+            <button type="button" onClick={handleClick} className="text-xs text-[#c8a44e] transition hover:text-[#d4b35c]">Change logo</button>
+            <button type="button" onClick={removeWatermark} className="cursor-pointer text-xs text-[#c45b4f] transition hover:text-[#d4695d]">Remove</button>
+          </div>
 
           <div className="flex items-center gap-2">
             <span className="text-xs text-[#9a9484]">Opacity</span>
@@ -151,6 +154,13 @@ function WatermarkEditor({
         className="hidden"
         onChange={handleChange}
       />
+      {isLoading && <p role="status" className="text-xs text-[#9a9484]">Loading logo…</p>}
+      {error && (
+        <div role="alert" className="flex items-start gap-2 text-xs text-[#e3a39a]">
+          <span>{error}</span>
+          <button type="button" onClick={onDismissError} aria-label="Dismiss watermark error" className="text-[#c8a44e]">×</button>
+        </div>
+      )}
     </div>
   )
 }

@@ -2,9 +2,12 @@ import { useRef, useState, type ChangeEvent, type DragEvent } from "react"
 
 interface DropZoneProps {
   onImageLoad: (file: File) => void
+  isLoading: boolean
+  error: string | null
+  onDismissError: () => void
 }
 
-function DropZone({ onImageLoad }: DropZoneProps) {
+function DropZone({ onImageLoad, isLoading, error, onDismissError }: DropZoneProps) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [isDragging, setIsDragging] = useState(false)
 
@@ -70,6 +73,13 @@ function DropZone({ onImageLoad }: DropZoneProps) {
         Drop image or click to browse
       </p>
       <p className="mt-1 text-xs text-[#5a5449]">JPG, PNG, WebP</p>
+      {isLoading && <p role="status" className="mt-3 text-xs text-[#9a9484]">Loading image…</p>}
+      {error && (
+        <div role="alert" className="mt-3 max-w-xs px-3 text-center text-xs text-[#e3a39a]" onClick={(event) => event.stopPropagation()}>
+          <span>{error}</span>
+          <button type="button" onClick={onDismissError} aria-label="Dismiss image error" className="ml-2 text-[#c8a44e]">×</button>
+        </div>
+      )}
       <input
         ref={inputRef}
         type="file"

@@ -18,13 +18,18 @@ export interface ExportParams {
 export async function exportImage(params: ExportParams): Promise<Blob> {
   const { originalImage, filterConfig, textConfig, watermarkConfig, resolution, format, quality } = params
   const preset = RESOLUTION_PRESETS[resolution]
+  const sourceWidth = originalImage.naturalWidth
+  const sourceHeight = originalImage.naturalHeight
+  if (![sourceWidth, sourceHeight, preset.width, preset.height].every((value) => Number.isFinite(value) && value > 0)) {
+    throw new Error('Invalid image dimensions')
+  }
 
   // Step 1: Create an offscreen canvas at the target resolution.
   const canvas = document.createElement('canvas')
 
   // Calculate dimensions maintaining the original image aspect ratio.
   // The preset defines the MAX dimensions (bounding box).
-  const imgAspect = originalImage.naturalWidth / originalImage.naturalHeight
+  const imgAspect = sourceWidth / sourceHeight
   const boxAspect = preset.width / preset.height
   let targetWidth: number
   let targetHeight: number
@@ -35,10 +40,14 @@ export async function exportImage(params: ExportParams): Promise<Blob> {
     targetHeight = preset.height
     targetWidth = Math.round(preset.height * imgAspect)
   }
+  if (![targetWidth, targetHeight].every((value) => Number.isFinite(value) && value > 0)) {
+    throw new Error('Invalid export dimensions')
+  }
   canvas.width = targetWidth
   canvas.height = targetHeight
 
-  const ctx = canvas.getContext('2d')!
+  const ctx = canvas.getContext('2d')
+  if (!ctx) throw new Error('Canvas is unavailable')
 
   // Step 2: Draw the original image scaled to target resolution.
   ctx.drawImage(originalImage, 0, 0, targetWidth, targetHeight)
@@ -68,13 +77,20 @@ export async function exportImage(params: ExportParams): Promise<Blob> {
   // Step 7: Convert canvas to Blob.
   // canvas.toBlob() produces a clean image with zero EXIF metadata.
   return new Promise<Blob>((resolve, reject) => {
-    canvas.toBlob(
-      (blob) => {
-        if (blob) resolve(blob)
-        else reject(new Error('Failed to export image'))
-      },
-      format,
-      format === 'image/jpeg' ? quality : undefined,
-    )
+    try {
+      canvas.toBlob(
+        (blob) => {
+          if (!blob || blob.size === 0 || blob.type !== format) {
+            reject(new Error('Failed to encode image'))
+            return
+          }
+          resolve(blob)
+        },
+        format,
+        format === 'image/jpeg' ? quality : undefined,
+      )
+    } catch (error) {
+      reject(error)
+    }
   })
 }

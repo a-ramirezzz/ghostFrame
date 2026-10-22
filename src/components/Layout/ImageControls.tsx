@@ -4,9 +4,12 @@ interface ImageControlsProps {
   image: HTMLImageElement | null
   fileName: string
   onImageLoad: (file: File) => void
+  isLoading: boolean
+  error: string | null
+  onDismissError: () => void
 }
 
-function ImageControls({ image, fileName, onImageLoad }: ImageControlsProps) {
+function ImageControls({ image, fileName, onImageLoad, isLoading, error, onDismissError }: ImageControlsProps) {
   const inputRef = useRef<HTMLInputElement>(null)
 
   const handleClick = () => {
@@ -54,6 +57,13 @@ function ImageControls({ image, fileName, onImageLoad }: ImageControlsProps) {
         className="hidden"
         onChange={handleChange}
       />
+      {isLoading && <p role="status" className="mt-2 text-xs text-[#9a9484]">Loading image…</p>}
+      {error && (
+        <div role="alert" className="mt-2 flex items-start gap-2 text-xs text-[#e3a39a]">
+          <span>{error}</span>
+          <button type="button" onClick={onDismissError} aria-label="Dismiss image error" className="text-[#c8a44e]">×</button>
+        </div>
+      )}
     </div>
   )
 }

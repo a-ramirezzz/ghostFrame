@@ -12,17 +12,20 @@ import useWatermarkConfig from "../../hooks/useWatermarkConfig"
 import useZoom from "../../hooks/useZoom"
 import ImageControls from "./ImageControls"
 import SidebarSection from "./SidebarSection"
-import { useState } from "react"
+import { useCallback, useState } from "react"
 
 function Layout() {
-  const { originalImage, fileName, loadImage } = useImageLoader()
+  const { originalImage, fileName, loadImage, isLoading: isImageLoading, error: imageError, dismissError: dismissImageError } = useImageLoader()
   const { textConfig, updateTextConfig } = useTextConfig()
-  const { watermarkConfig, loadWatermark, removeWatermark, updateWatermarkConfig } =
+  const { watermarkConfig, loadWatermark, removeWatermark, updateWatermarkConfig, isLoading: isWatermarkLoading, error: watermarkError, dismissError: dismissWatermarkError } =
     useWatermarkConfig()
   const { filterConfig, setFilter, setIntensity } = useFilterConfig()
-  const { exportConfig, isExporting, updateExportConfig, performExport } = useExport()
   const { zoom, zoomIn, zoomOut, resetZoom } = useZoom()
   const [layoutWarning, setLayoutWarning] = useState<string | null>(null)
+  const [previewError, setPreviewError] = useState<string | null>(null)
+  const isExportEligible = originalImage !== null && !isImageLoading && !isWatermarkLoading && previewError === null
+  const { exportConfig, isExporting, error: exportError, dismissError: dismissExportError, updateExportConfig, performExport } = useExport(isExportEligible)
+  const handleRenderError = useCallback((error: string | null) => setPreviewError(error), [])
 
   const handleWheel = (event: React.WheelEvent) => {
     if (event.ctrlKey || event.metaKey) {
@@ -33,7 +36,7 @@ function Layout() {
   }
 
   const handleExport = () => {
-    if (!originalImage) return
+    if (!isExportEligible || !originalImage) return
     performExport({ originalImage, filterConfig, textConfig, watermarkConfig })
   }
 
@@ -75,6 +78,9 @@ function Layout() {
               image={originalImage}
               fileName={fileName}
               onImageLoad={loadImage}
+              isLoading={isImageLoading}
+              error={imageError}
+              onDismissError={dismissImageError}
             />
           </SidebarSection>
 
@@ -101,6 +107,9 @@ function Layout() {
               loadWatermark={loadWatermark}
               removeWatermark={removeWatermark}
               updateWatermarkConfig={updateWatermarkConfig}
+              isLoading={isWatermarkLoading}
+              error={watermarkError}
+              onDismissError={dismissWatermarkError}
             />
           </SidebarSection>
 
@@ -111,6 +120,9 @@ function Layout() {
               onUpdateConfig={updateExportConfig}
               onExport={handleExport}
               hasImage={originalImage !== null}
+              isBlocked={!isExportEligible}
+              error={exportError}
+              onDismissError={dismissExportError}
             />
           </SidebarSection>
         </div>
@@ -128,9 +140,10 @@ function Layout() {
             filterConfig={filterConfig}
             zoom={zoom}
             onLayoutWarning={setLayoutWarning}
+            onRenderError={handleRenderError}
           />
         ) : (
-          <DropZone onImageLoad={loadImage} />
+          <DropZone onImageLoad={loadImage} isLoading={isImageLoading} error={imageError} onDismissError={dismissImageError} />
         )}
 
         {originalImage && (
