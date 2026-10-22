@@ -46,12 +46,40 @@ Use prefixes for clarity:
 
 ## Development Setup
 
+GhostFrame supports Node.js 24 LTS, matching the version used by continuous integration.
+
 ```bash
 git clone https://github.com/a-ramirezzz/ghostframe.git
 cd ghostframe
-npm install
+npm ci
 npm run dev
 ```
+
+## Validation
+
+Run the type checker, linter, unit/integration tests, and production build together:
+
+```bash
+npm run check
+```
+
+The individual commands are `npm run typecheck`, `npm run lint`, `npm test`, and
+`npm run build`. During development, use `npm run test:watch` for Vitest watch mode.
+
+Browser smoke tests use Chromium and remain separate from `check`, so normal validation
+does not require an installed browser. Install it once and run the production-preview suite.
+The Playwright command builds the current checkout before starting Vite Preview on its
+dedicated strict port:
+
+```bash
+npx playwright install chromium
+npm run test:e2e
+```
+
+Vitest's Canvas contexts and font measurements are deterministic doubles. Those tests
+protect orchestration, caching, failure handling, and geometry invariants, but they do not
+verify real font metrics or raster appearance. The Playwright suite loads the bundled local
+fonts and exercises the browser Canvas and image encoders using local fixtures.
 
 ## Guidelines
 
