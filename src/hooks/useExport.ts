@@ -74,7 +74,8 @@ function useExport(isEligible: boolean, initial = DEFAULT_EXPORT_CONFIG) {
   )
 
   const resetExportConfig = useCallback(() => setExportConfig({ ...DEFAULT_EXPORT_CONFIG }), [])
-  return { exportConfig, isExporting, error, dismissError: () => setError(null), updateExportConfig, resetExportConfig, performExport }
+  const replaceExportConfig = useCallback((value: ExportConfig) => setExportConfig({ ...value }), [])
+  return { exportConfig, isExporting, error, dismissError: () => setError(null), updateExportConfig, replaceExportConfig, resetExportConfig, performExport }
 }
 
 export default useExport

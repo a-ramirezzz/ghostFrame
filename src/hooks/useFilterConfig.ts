@@ -14,7 +14,8 @@ function useFilterConfig(initial = DEFAULT_FILTER_CONFIG) {
   }, [])
 
   const resetFilterConfig = useCallback(() => setFilterConfig({ ...DEFAULT_FILTER_CONFIG }), [])
-  return { filterConfig, setFilter, setIntensity, resetFilterConfig }
+  const replaceFilterConfig = useCallback((value: FilterConfig) => setFilterConfig({ ...value }), [])
+  return { filterConfig, setFilter, setIntensity, replaceFilterConfig, resetFilterConfig }
 }
 
 export default useFilterConfig

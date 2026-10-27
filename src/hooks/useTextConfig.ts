@@ -10,7 +10,8 @@ function useTextConfig(initial = DEFAULT_TEXT_CONFIG) {
   }, [])
 
   const resetTextConfig = useCallback(() => setTextConfig({ ...DEFAULT_TEXT_CONFIG }), [])
-  return { textConfig, updateTextConfig, resetTextConfig }
+  const replaceTextConfig = useCallback((value: TextConfig) => setTextConfig({ ...value }), [])
+  return { textConfig, updateTextConfig, replaceTextConfig, resetTextConfig }
 }
 
 export default useTextConfig

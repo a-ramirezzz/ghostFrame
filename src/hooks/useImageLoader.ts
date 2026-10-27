@@ -1,124 +1,60 @@
 import { useCallback, useEffect, useRef, useState } from "react"
 import type { GhostFrameState } from "../types"
-import {
-  IMAGE_DECODE_ERROR,
-  MAIN_IMAGE_TYPES,
-  validateImageDimensions,
-  validateImageFile,
-} from "../utils/imageLoading"
+import { MAIN_IMAGE_TYPES } from "../utils/imageLoading"
+import { prepareImageAsset, type ImageAssetPreparation, type PreparedImageAsset } from "../utils/imageAsset"
 
-function stripExtension(name: string) {
-  const lastDot = name.lastIndexOf(".")
-  return lastDot > 0 ? name.slice(0, lastDot) : name
-}
+function stripExtension(name: string) { const dot = name.lastIndexOf("."); return dot > 0 ? name.slice(0, dot) : name }
 
 function useImageLoader() {
-  const [state, setState] = useState<GhostFrameState>({
-    originalImage: null,
-    fileName: "",
-  })
+  const [state, setState] = useState<GhostFrameState>({ originalImage: null, fileName: "" })
+  const [sourceFile, setSourceFile] = useState<File | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const requestIdRef = useRef(0)
-  const currentUrlRef = useRef<string | null>(null)
-  const pendingUrlRef = useRef<string | null>(null)
+  const currentRef = useRef<PreparedImageAsset | null>(null)
+  const pendingRef = useRef<ImageAssetPreparation | null>(null)
+  const mountedRef = useRef(true)
 
-  const revoke = (url: string | null) => {
-    if (url) URL.revokeObjectURL(url)
-  }
+  const commitPrepared = useCallback((prepared: PreparedImageAsset) => {
+    requestIdRef.current += 1
+    pendingRef.current?.cancel(); pendingRef.current = null
+    const previous = currentRef.current; currentRef.current = prepared
+    setState({ originalImage: prepared.image, fileName: stripExtension(prepared.file.name) })
+    setSourceFile(prepared.file); setIsLoading(false); setError(null)
+    if (previous) window.setTimeout(previous.dispose, 0)
+  }, [])
 
   const loadImage = useCallback((file: File) => {
+    pendingRef.current?.cancel(); pendingRef.current = null
     const requestId = ++requestIdRef.current
-    revoke(pendingUrlRef.current)
-    pendingUrlRef.current = null
-    setError(null)
-    const validationError = validateImageFile(file, MAIN_IMAGE_TYPES)
-    if (validationError) {
-      setIsLoading(false)
-      setError(validationError)
-      return
-    }
-
-    setIsLoading(true)
-    let objectUrl: string | null = null
-    let cleanedUp = false
-    let settled = false
-
-    const fail = (message = IMAGE_DECODE_ERROR) => {
-      if (settled) return
-      if (!cleanedUp) {
-        cleanedUp = true
-        if (pendingUrlRef.current === objectUrl) pendingUrlRef.current = null
-        revoke(objectUrl)
-      }
-      settled = true
-      if (requestId !== requestIdRef.current) return
-      setIsLoading(false)
-      setError(message)
-    }
-
+    setError(null); setIsLoading(true)
     try {
-      objectUrl = URL.createObjectURL(file)
-      pendingUrlRef.current = objectUrl
-      const img = new Image()
-
-      img.onload = async () => {
-        try {
-          await img.decode()
-        } catch {
-          fail()
-          return
-        }
-        if (requestId !== requestIdRef.current || pendingUrlRef.current !== objectUrl) return
-        const dimensionError = validateImageDimensions(img)
-        if (dimensionError) {
-          fail(dimensionError)
-          return
-        }
-        pendingUrlRef.current = null
-        settled = true
-        revoke(currentUrlRef.current)
-        currentUrlRef.current = objectUrl
-        setState({
-          originalImage: img,
-          fileName: stripExtension(file.name),
-        })
-        setIsLoading(false)
-        setError(null)
+      const pending = prepareImageAsset(file, MAIN_IMAGE_TYPES, (failure) => {
+        if (mountedRef.current && requestId === requestIdRef.current) { setIsLoading(false); setError(failure.message) }
+      })
+      pendingRef.current = pending
+      void pending.then((prepared) => {
+      if (pendingRef.current === pending) pendingRef.current = null
+      if (!mountedRef.current || requestId !== requestIdRef.current) { prepared.dispose(); return }
+      commitPrepared(prepared)
+      }).catch((caught: unknown) => {
+      if (pendingRef.current === pending) pendingRef.current = null
+      if (mountedRef.current && requestId === requestIdRef.current) {
+        setIsLoading(false); setError(caught instanceof Error ? caught.message : "This image could not be opened.")
       }
-      img.onerror = () => fail()
-      img.src = objectUrl
-    } catch {
-      fail()
-    }
-  }, [])
+      })
+    } catch (caught) { setIsLoading(false); setError(caught instanceof Error ? caught.message : "This image could not be opened.") }
+  }, [commitPrepared])
 
+  const cancelPending = useCallback(() => { requestIdRef.current += 1; pendingRef.current?.cancel(); pendingRef.current = null; setIsLoading(false) }, [])
   const clearImage = useCallback(() => {
-    requestIdRef.current += 1
-    revoke(pendingUrlRef.current)
-    revoke(currentUrlRef.current)
-    pendingUrlRef.current = null
-    currentUrlRef.current = null
-    setIsLoading(false)
-    setError(null)
-    setState({ originalImage: null, fileName: "" })
+    requestIdRef.current += 1; pendingRef.current?.cancel(); pendingRef.current = null; currentRef.current?.dispose(); currentRef.current = null
+    setIsLoading(false); setError(null); setSourceFile(null); setState({ originalImage: null, fileName: "" })
   }, [])
+  useEffect(() => { mountedRef.current = true; return () => { mountedRef.current = false; requestIdRef.current += 1; pendingRef.current?.cancel(); pendingRef.current = null; currentRef.current?.dispose(); currentRef.current = null } }, [])
 
-  useEffect(() => () => {
-    requestIdRef.current += 1
-    revoke(pendingUrlRef.current)
-    revoke(currentUrlRef.current)
-  }, [])
-
-  return {
-    originalImage: state.originalImage,
-    fileName: state.fileName,
-    loadImage,
-    clearImage,
-    isLoading,
-    error,
-    dismissError: () => setError(null),
-  }
+  return { originalImage: state.originalImage, fileName: state.fileName, sourceFile, loadImage, clearImage,
+    commitPrepared, cancelPending, isLoading, error, dismissError: () => setError(null) }
 }
 
 export default useImageLoader

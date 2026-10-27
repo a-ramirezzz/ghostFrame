@@ -14,22 +14,35 @@ import useEditorPersistence from "../../hooks/useEditorPersistence"
 import { loadEditorSnapshot } from "../../state/editorPersistence"
 import ImageControls from "./ImageControls"
 import SidebarSection from "./SidebarSection"
-import { useCallback, useState } from "react"
+import ProjectsPanel from "../Projects/ProjectsPanel"
+import useProjects from "../../hooks/useProjects"
+import { useCallback, useMemo, useState } from "react"
 
 function Layout() {
   const [initialEditor] = useState(loadEditorSnapshot)
-  const { originalImage, fileName, loadImage, isLoading: isImageLoading, error: imageError, dismissError: dismissImageError } = useImageLoader()
-  const { textConfig, updateTextConfig, resetTextConfig } = useTextConfig(initialEditor.snapshot.text)
-  const { watermarkConfig, loadWatermark, removeWatermark, updateWatermarkConfig, resetWatermarkConfig, isLoading: isWatermarkLoading, error: watermarkError, dismissError: dismissWatermarkError } =
-    useWatermarkConfig(initialEditor.snapshot.watermark)
-  const { filterConfig, setFilter, setIntensity, resetFilterConfig } = useFilterConfig(initialEditor.snapshot.filter)
+  const image = useImageLoader()
+  const { originalImage, fileName, sourceFile, loadImage, isLoading: isImageLoading, error: imageError, dismissError: dismissImageError } = image
+  const { textConfig, updateTextConfig, replaceTextConfig, resetTextConfig } = useTextConfig(initialEditor.snapshot.text)
+  const watermark = useWatermarkConfig(initialEditor.snapshot.watermark)
+  const { watermarkConfig, sourceFile: watermarkFile, loadWatermark, removeWatermark, updateWatermarkConfig, replaceWatermarkConfig, resetWatermarkConfig, isLoading: isWatermarkLoading, error: watermarkError, dismissError: dismissWatermarkError } =
+    watermark
+  const { filterConfig, setFilter, setIntensity, replaceFilterConfig, resetFilterConfig } = useFilterConfig(initialEditor.snapshot.filter)
   const { zoom, zoomIn, zoomOut, resetZoom } = useZoom()
   const [layoutWarning, setLayoutWarning] = useState<string | null>(null)
   const [previewError, setPreviewError] = useState<string | null>(null)
   const isExportEligible = originalImage !== null && !isImageLoading && !isWatermarkLoading && previewError === null
-  const { exportConfig, isExporting, error: exportError, dismissError: dismissExportError, updateExportConfig, resetExportConfig, performExport } = useExport(isExportEligible, initialEditor.snapshot.export)
+  const { exportConfig, isExporting, error: exportError, dismissError: dismissExportError, updateExportConfig, replaceExportConfig, resetExportConfig, performExport } = useExport(isExportEligible, initialEditor.snapshot.export)
   const persistence = useEditorPersistence(initialEditor, { textConfig, filterConfig, watermarkConfig, exportConfig })
   const handleRenderError = useCallback((error: string | null) => setPreviewError(error), [])
+  const projectTarget = useMemo(() => ({
+    commitImage: image.commitPrepared, commitWatermark: watermark.commitPrepared,
+    replaceText: replaceTextConfig, replaceFilter: replaceFilterConfig,
+    replaceWatermark: replaceWatermarkConfig, replaceExport: replaceExportConfig,
+    cancelImage: image.cancelPending, cancelWatermark: watermark.cancelPending,
+    clearPreviewMessages: () => { setLayoutWarning(null); setPreviewError(null); dismissImageError(); dismissWatermarkError(); dismissExportError() },
+  }), [dismissExportError, dismissImageError, dismissWatermarkError, image.cancelPending, image.commitPrepared, replaceExportConfig, replaceFilterConfig, replaceTextConfig, replaceWatermarkConfig, watermark.cancelPending, watermark.commitPrepared])
+  const projects = useProjects({ textConfig, filterConfig, watermarkConfig, exportConfig, sourceFile, watermarkFile }, projectTarget,
+    isExporting || isImageLoading || isWatermarkLoading)
 
   const handleWheel = (event: React.WheelEvent) => {
     if (event.ctrlKey || event.metaKey) {
@@ -40,17 +53,18 @@ function Layout() {
   }
 
   const handleExport = () => {
-    if (!isExportEligible || !originalImage) return
+    if (!isExportEligible || !originalImage || projects.isBusy) return
     performExport({ originalImage, filterConfig, textConfig, watermarkConfig })
   }
 
   const handleReset = () => {
-    if (isExporting || !window.confirm("Reset saved text and editor settings? Your selected image and logo will stay open.")) return
+    if (isExporting || projects.isBusy || !window.confirm("Reset saved text and editor settings? Your selected image and logo will stay open.")) return
     if (!persistence.clearSavedEditor()) return
     resetTextConfig()
     resetFilterConfig()
     resetWatermarkConfig()
     resetExportConfig()
+    projects.detach()
     setLayoutWarning(null)
   }
 
@@ -87,11 +101,20 @@ function Layout() {
         </div>
 
         <div className="flex flex-col gap-4">
+          <SidebarSection title="Projects">
+            <ProjectsPanel name={projects.projectName} onNameChange={projects.setProjectName} projects={projects.projects}
+              activeId={projects.activeId} dirty={projects.isDirty} busy={projects.isBusy}
+              blocked={isExporting || isImageLoading || isWatermarkLoading} status={projects.status}
+              refreshError={projects.refreshError} onRetryList={() => void projects.retryList()}
+              onSave={() => void projects.save()} onSaveAsNew={() => void projects.save(true)}
+              onOpen={(id) => void projects.open(id)} onDelete={(id) => void projects.remove(id)} />
+          </SidebarSection>
+
           <SidebarSection title="Image">
             <ImageControls
               image={originalImage}
               fileName={fileName}
-              onImageLoad={loadImage}
+              onImageLoad={(file) => { if (!projects.isOpening) loadImage(file) }}
               isLoading={isImageLoading}
               error={imageError}
               onDismissError={dismissImageError}
@@ -101,7 +124,7 @@ function Layout() {
           <SidebarSection title="Text">
             <TextEditor
               textConfig={textConfig}
-              updateTextConfig={updateTextConfig}
+              updateTextConfig={(value) => { if (!projects.isOpening) updateTextConfig(value) }}
               layoutWarning={layoutWarning}
             />
           </SidebarSection>
@@ -109,8 +132,8 @@ function Layout() {
           <SidebarSection title="Filters">
             <FilterPanel
               filterConfig={filterConfig}
-              onSelectFilter={setFilter}
-              onIntensityChange={setIntensity}
+              onSelectFilter={(value) => { if (!projects.isOpening) setFilter(value) }}
+              onIntensityChange={(value) => { if (!projects.isOpening) setIntensity(value) }}
               previewImage={originalImage}
             />
           </SidebarSection>
@@ -118,9 +141,9 @@ function Layout() {
           <SidebarSection title="Watermark">
             <WatermarkEditor
               watermarkConfig={watermarkConfig}
-              loadWatermark={loadWatermark}
-              removeWatermark={removeWatermark}
-              updateWatermarkConfig={updateWatermarkConfig}
+              loadWatermark={(file) => { if (!projects.isOpening) loadWatermark(file) }}
+              removeWatermark={() => { if (!projects.isOpening) removeWatermark() }}
+              updateWatermarkConfig={(value) => { if (!projects.isOpening) updateWatermarkConfig(value) }}
               isLoading={isWatermarkLoading}
               error={watermarkError}
               onDismissError={dismissWatermarkError}
@@ -131,10 +154,10 @@ function Layout() {
             <ExportPanel
               exportConfig={exportConfig}
               isExporting={isExporting}
-              onUpdateConfig={updateExportConfig}
+              onUpdateConfig={(value) => { if (!projects.isOpening) updateExportConfig(value) }}
               onExport={handleExport}
               hasImage={originalImage !== null}
-              isBlocked={!isExportEligible}
+              isBlocked={!isExportEligible || projects.isBusy}
               error={exportError}
               onDismissError={dismissExportError}
             />
@@ -153,7 +176,7 @@ function Layout() {
             </p>
             <div className="mt-2 flex gap-3">
               {persistence.status === "unavailable" && <button type="button" onClick={persistence.retry} className="text-[#c8a44e]">Retry save</button>}
-              <button type="button" onClick={handleReset} disabled={isExporting} className="text-[#c8a44e] disabled:cursor-not-allowed disabled:opacity-40">Reset editor</button>
+              <button type="button" onClick={handleReset} disabled={isExporting || projects.isBusy} className="text-[#c8a44e] disabled:cursor-not-allowed disabled:opacity-40">Reset editor</button>
             </div>
           </div>
         </div>
@@ -174,7 +197,7 @@ function Layout() {
             onRenderError={handleRenderError}
           />
         ) : (
-          <DropZone onImageLoad={loadImage} isLoading={isImageLoading} error={imageError} onDismissError={dismissImageError} />
+          <DropZone onImageLoad={(file) => { if (!projects.isOpening) loadImage(file) }} isLoading={isImageLoading} error={imageError} onDismissError={dismissImageError} />
         )}
 
         {originalImage && (
