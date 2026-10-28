@@ -69,14 +69,14 @@ function Layout() {
   }
 
   return (
-    <div className="relative flex h-screen bg-[#0c0b09]">
+    <div className="editor-shell relative flex h-screen bg-[#0c0b09]">
       <div
         className="pointer-events-none absolute top-0 left-0 right-0 h-px"
         style={{ background: "linear-gradient(to right, transparent, #c8a44e40, transparent)" }}
       />
 
       <aside
-        className="sidebar-scroll w-80 shrink-0 overflow-y-auto bg-[#12110e] p-4"
+        className="editor-sidebar sidebar-scroll w-80 shrink-0 overflow-y-auto bg-[#12110e] p-4"
         style={{ boxShadow: "inset -8px 0 16px -8px rgba(0,0,0,0.3)" }}
       >
         <div className="mb-4 pb-4">
@@ -160,6 +160,7 @@ function Layout() {
               isBlocked={!isExportEligible || projects.isBusy}
               error={exportError}
               onDismissError={dismissExportError}
+              image={originalImage}
             />
           </SidebarSection>
 
@@ -183,7 +184,7 @@ function Layout() {
       </aside>
 
       <main
-        className="relative flex h-screen flex-1 items-center justify-center overflow-hidden bg-[#0c0b09]"
+        className="preview-workspace relative flex h-screen min-w-0 flex-1 items-center justify-center overflow-hidden bg-[#0c0b09]"
         onWheel={handleWheel}
       >
         {originalImage ? (
@@ -205,19 +206,23 @@ function Layout() {
             <button
               type="button"
               onClick={zoomOut}
+              aria-label="Zoom out"
               className="flex h-8 w-8 items-center justify-center rounded-full text-lg text-[#9a9484] transition-all duration-200 hover:bg-[#221f1a] hover:text-[#e8e2d6]"
             >
               −
             </button>
-            <span
+            <button
+              type="button"
               onClick={resetZoom}
-              className="w-12 cursor-pointer text-center text-xs text-[#9a9484] transition hover:text-[#c8a44e]"
+              aria-label="Reset zoom to fit"
+              className="h-8 w-12 cursor-pointer text-center text-xs text-[#9a9484] transition hover:text-[#c8a44e]"
             >
               {zoom === 1 ? "Fit" : `${Math.round(zoom * 100)}%`}
-            </span>
+            </button>
             <button
               type="button"
               onClick={zoomIn}
+              aria-label="Zoom in"
               className="flex h-8 w-8 items-center justify-center rounded-full text-lg text-[#9a9484] transition-all duration-200 hover:bg-[#221f1a] hover:text-[#e8e2d6]"
             >
               +

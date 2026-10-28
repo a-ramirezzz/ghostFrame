@@ -99,8 +99,9 @@ function FilterPanel({
 
       {filterConfig.active !== "none" && (
         <div className="flex items-center gap-2">
-          <span className="text-xs text-[#9a9484]">Intensity</span>
+          <label htmlFor="filter-intensity" className="text-xs text-[#9a9484]">Intensity</label>
           <input
+            id="filter-intensity"
             type="range"
             min={0}
             max={1}

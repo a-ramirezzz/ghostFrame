@@ -215,8 +215,8 @@ function ImageCanvas({ image, textConfig, watermarkConfig, filterConfig, zoom, o
     return <div ref={containerRef} className="flex h-full w-full items-center justify-center overflow-auto" />
   }
 
-  const availableWidth = containerSize.width - CONTAINER_PADDING
-  const availableHeight = containerSize.height - CONTAINER_PADDING
+  const availableWidth = Math.max(0, containerSize.width - CONTAINER_PADDING)
+  const availableHeight = Math.max(0, containerSize.height - CONTAINER_PADDING)
   const scaleX = availableWidth / image.naturalWidth
   const scaleY = availableHeight / image.naturalHeight
   const fitScale = Math.min(scaleX, scaleY, 1)
@@ -224,16 +224,19 @@ function ImageCanvas({ image, textConfig, watermarkConfig, filterConfig, zoom, o
   const displayHeight = image.naturalHeight * fitScale * zoom
 
   return (
-    <div ref={containerRef} className="relative flex h-full w-full items-center justify-center overflow-auto">
-      <canvas
-        ref={canvasRef}
-        style={{
-          width: displayWidth,
-          height: displayHeight,
-          boxShadow: "0 4px 24px rgba(0,0,0,0.5)",
-          borderRadius: "6px",
-        }}
-      />
+    <div ref={containerRef} className="relative h-full w-full overflow-auto">
+      <div className="flex items-center justify-center" style={{ minWidth: "100%", minHeight: "100%", width: displayWidth + CONTAINER_PADDING, height: displayHeight + CONTAINER_PADDING }}>
+        <canvas
+          ref={canvasRef}
+          style={{
+            width: displayWidth,
+            height: displayHeight,
+            boxShadow: "0 4px 24px rgba(0,0,0,0.5)",
+            borderRadius: "6px",
+            flex: "none",
+          }}
+        />
+      </div>
       {renderError && (
         <div
           role="alert"

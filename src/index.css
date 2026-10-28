@@ -1,5 +1,45 @@
 @import "tailwindcss";
 
+:focus-visible {
+  outline: 2px solid #c8a44e;
+  outline-offset: 2px;
+}
+
+.resolution-card:has(input:focus-visible) {
+  outline: 2px solid #c8a44e;
+  outline-offset: 2px;
+}
+
+@media (max-width: 767px) {
+  .editor-shell {
+    min-height: 100vh;
+    min-height: 100svh;
+    height: auto;
+    flex-direction: column;
+  }
+
+  .preview-workspace {
+    order: 1;
+    width: 100%;
+    height: 45vh;
+    height: 45svh;
+    min-height: 280px;
+    max-height: 520px;
+    flex: none;
+  }
+
+  .editor-sidebar {
+    order: 2;
+    width: 100%;
+    overflow: visible;
+    box-shadow: none !important;
+  }
+
+  button, label:has(input[type="radio"]) {
+    min-height: 44px;
+  }
+}
+
 .sidebar-scroll::-webkit-scrollbar {
   width: 4px;
 }

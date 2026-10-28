@@ -135,8 +135,9 @@ function TextEditor({ textConfig, updateTextConfig, layoutWarning }: TextEditorP
       </select>
 
       <div className="flex items-center gap-2">
-        <span className="text-xs text-[#9a9484]">Size</span>
+        <label htmlFor="quote-size" className="text-xs text-[#9a9484]">Size</label>
         <input
+          id="quote-size"
           type="range"
           min={16}
           max={72}
@@ -151,8 +152,9 @@ function TextEditor({ textConfig, updateTextConfig, layoutWarning }: TextEditorP
       </div>
 
       <div className="flex items-center justify-between">
-        <span className="text-xs text-[#9a9484]">Color</span>
+        <label htmlFor="quote-color" className="text-xs text-[#9a9484]">Color</label>
         <input
+          id="quote-color"
           type="color"
           value={textConfig.color}
           onChange={handleColorChange}
@@ -226,8 +228,9 @@ function TextEditor({ textConfig, updateTextConfig, layoutWarning }: TextEditorP
 
       {textConfig.showOverlay && (
         <div className="flex items-center gap-2">
-          <span className="text-xs text-[#9a9484]">Overlay opacity</span>
+          <label htmlFor="overlay-opacity" className="text-xs text-[#9a9484]">Overlay opacity</label>
           <input
+            id="overlay-opacity"
             type="range"
             min={0.1}
             max={0.9}

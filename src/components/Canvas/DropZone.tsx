@@ -40,16 +40,16 @@ function DropZone({ onImageLoad, isLoading, error, onDismissError }: DropZonePro
 
   return (
     <div
-      onClick={handleClick}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
-      className={`group flex aspect-square w-full max-w-[400px] max-h-[400px] cursor-pointer flex-col items-center justify-center rounded-xl border transition-all duration-300 ${
+      className={`group flex aspect-square w-full max-w-[400px] max-h-[400px] flex-col items-center justify-center rounded-xl border transition-all duration-300 ${
         isDragging
           ? "border-[#c8a44e] bg-[rgba(200,164,78,0.04)]"
           : "border-[#2a2721] bg-transparent hover:border-[#3d3830] hover:bg-[#1a181408]"
       }`}
     >
+      <button type="button" onClick={handleClick} disabled={isLoading} className="flex min-h-44 w-full flex-col items-center justify-center rounded-xl disabled:cursor-wait">
       <svg
         width="32"
         height="32"
@@ -74,8 +74,9 @@ function DropZone({ onImageLoad, isLoading, error, onDismissError }: DropZonePro
       </p>
       <p className="mt-1 text-xs text-[#5a5449]">JPG, PNG, WebP</p>
       {isLoading && <p role="status" className="mt-3 text-xs text-[#9a9484]">Loading image…</p>}
+      </button>
       {error && (
-        <div role="alert" className="mt-3 max-w-xs px-3 text-center text-xs text-[#e3a39a]" onClick={(event) => event.stopPropagation()}>
+        <div role="alert" className="mt-3 max-w-xs px-3 text-center text-xs text-[#e3a39a]">
           <span>{error}</span>
           <button type="button" onClick={onDismissError} aria-label="Dismiss image error" className="ml-2 text-[#c8a44e]">×</button>
         </div>

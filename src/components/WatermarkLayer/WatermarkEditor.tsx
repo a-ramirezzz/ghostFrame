@@ -73,8 +73,9 @@ function WatermarkEditor({
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="text-xs text-[#9a9484]">Opacity</span>
+            <label htmlFor="watermark-opacity" className="text-xs text-[#9a9484]">Opacity</label>
             <input
+              id="watermark-opacity"
               type="range"
               min={0.05}
               max={0.5}
@@ -89,8 +90,9 @@ function WatermarkEditor({
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="text-xs text-[#9a9484]">Size</span>
+            <label htmlFor="watermark-size" className="text-xs text-[#9a9484]">Size</label>
             <input
+              id="watermark-size"
               type="range"
               min={5}
               max={30}
@@ -104,13 +106,15 @@ function WatermarkEditor({
             </span>
           </div>
 
-          <div>
-            <span className="mb-1 block text-xs text-[#9a9484]">Position</span>
+          <fieldset>
+            <legend className="mb-1 block text-xs text-[#9a9484]">Position</legend>
             <div className="grid w-fit grid-cols-3 grid-rows-3 gap-1.5">
               {POSITIONS.map((position) => (
                 <button
                   key={position.value}
                   type="button"
+                  aria-label={`${position.value.replace("-", " ")} watermark position`}
+                  aria-pressed={watermarkConfig.position === position.value}
                   onClick={() => updateWatermarkConfig({ position: position.value })}
                   style={{ gridArea: position.area }}
                   className={`flex h-7 w-7 cursor-pointer items-center justify-center rounded-md border transition-all duration-200 ${
@@ -129,7 +133,7 @@ function WatermarkEditor({
                 </button>
               ))}
             </div>
-          </div>
+          </fieldset>
         </>
       ) : (
         <>

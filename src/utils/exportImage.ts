@@ -1,8 +1,8 @@
 import type { ExportResolution, FilterConfig, TextConfig, WatermarkConfig } from '../types'
-import { RESOLUTION_PRESETS } from '../types'
 import { applyFilter } from './filters'
 import { COMPOSITION_FIT_ERROR, drawBaseImage, drawComposition, drawWatermark, layoutComposition, prepareCompositionFonts } from './composition'
 import { applyNoiseGrain } from './noiseGenerator'
+import { getExportSize } from './exportSizing'
 
 export interface ExportParams {
   originalImage: HTMLImageElement
@@ -23,32 +23,13 @@ export class CompositionFitError extends Error {
 
 export async function exportImage(params: ExportParams): Promise<Blob> {
   const { originalImage, filterConfig, textConfig, watermarkConfig, resolution, format, quality } = params
-  const preset = RESOLUTION_PRESETS[resolution]
   const sourceWidth = originalImage.naturalWidth
   const sourceHeight = originalImage.naturalHeight
-  if (![sourceWidth, sourceHeight, preset.width, preset.height].every((value) => Number.isFinite(value) && value > 0)) {
-    throw new Error('Invalid image dimensions')
-  }
+  const { width: targetWidth, height: targetHeight } = getExportSize(sourceWidth, sourceHeight, resolution)
 
   // Step 1: Create an offscreen canvas at the target resolution.
   const canvas = document.createElement('canvas')
 
-  // Calculate dimensions maintaining the original image aspect ratio.
-  // The preset defines the MAX dimensions (bounding box).
-  const imgAspect = sourceWidth / sourceHeight
-  const boxAspect = preset.width / preset.height
-  let targetWidth: number
-  let targetHeight: number
-  if (imgAspect > boxAspect) {
-    targetWidth = preset.width
-    targetHeight = Math.round(preset.width / imgAspect)
-  } else {
-    targetHeight = preset.height
-    targetWidth = Math.round(preset.height * imgAspect)
-  }
-  if (![targetWidth, targetHeight].every((value) => Number.isFinite(value) && value > 0)) {
-    throw new Error('Invalid export dimensions')
-  }
   canvas.width = targetWidth
   canvas.height = targetHeight
 
