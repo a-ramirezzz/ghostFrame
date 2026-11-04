@@ -26,11 +26,11 @@ export interface WatermarkConfig {
 }
 
 export const AVAILABLE_FONTS = [
-  { name: 'Playfair Display', label: 'Playfair Display' },
-  { name: 'Montserrat', label: 'Montserrat' },
-  { name: 'Lora', label: 'Lora' },
-  { name: 'Cinzel', label: 'Cinzel' },
-  { name: 'Raleway', label: 'Raleway' },
+  { name: 'Playfair Display', label: 'Playfair Display', weight: 700 },
+  { name: 'Montserrat', label: 'Montserrat', weight: 700 },
+  { name: 'Lora', label: 'Lora', weight: 400 },
+  { name: 'Cinzel', label: 'Cinzel', weight: 400 },
+  { name: 'Raleway', label: 'Raleway', weight: 300 },
 ] as const
 
 export type FilterName = 'none' | 'stoic-dark' | 'marble' | 'golden-hour' | 'noir' | 'mist'
